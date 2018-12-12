@@ -3788,9 +3788,9 @@ int syncd_main(int argc, char **argv)
 
 #ifdef SAI_SWITCH_ATTR_UNINIT_DATA_PLANE_ON_REMOVAL
 
-    if (shutdownType == SYNCD_RESTART_TYPE_FAST)
+    if (shutdownType == SYNCD_RESTART_TYPE_FAST || shutdownType == SYNCD_RESTART_TYPE_WARM)
     {
-        SWSS_LOG_NOTICE("Fast Reboot requested, keeping data plane running");
+        SWSS_LOG_NOTICE("Fast/warm reboot requested, keeping data plane running");
 
         sai_attribute_t attr;
 
