@@ -3679,75 +3679,49 @@ int syncd_main(int argc, char **argv)
                 FlexCounter::removeAllCounters();
                 stopNotificationsProcessingThread();
 
-                /* FIXME: Temprary W/A */
-                char* platform = getenv("platform");
-                if (platform && (strncmp(platform, "mellanox", 8) == 0))
+                sai_attribute_t attr;
+
+                attr.value.booldata = true;
+
+                status = sai_switch_api->set_switch_attribute(gSwitchId, &attr);
+
+                if (status != SAI_STATUS_SUCCESS)
                 {
-                    /* on mellanox execute issu start
-                     * TODO: Mellanox SAI should perform issu start on
-                     * SAI_SWITCH_ATTR_PRE_SHUTDOWN
-                     */
-                    int rc = system("/usr/bin/issu --start");
-                    if (rc != 0)
-                    {
-                        SWSS_LOG_ERROR("Error happend during issu start");
-                        warmRestartTable->hset("warm-shutdown", "state", "pre-shutdown-failed");
-                    }
-                    else
-                    {
-                        warmRestartTable->hset("warm-shutdown", "state", "pre-shutdown-succeeded");
-                        s = std::make_shared<swss::Select>(); // make sure previous select is destroyed
-                        s->addSelectable(restartQuery.get());
-                        SWSS_LOG_NOTICE("switched to PRE_SHUTDOWN, from now on accepting only shurdown requests");
-                    }
+                    SWSS_LOG_ERROR("Failed to set SAI_SWITCH_ATTR_RESTART_WARM=true: %s for pre-shutdown",
+                            sai_serialize_status(status).c_str());
+
+                    shutdownType = SYNCD_RESTART_TYPE_COLD;
+
+                    warmRestartTable->hset("warm-shutdown", "state", "set-flag-failed");
+                    continue;
+                }
+
+                attr.id = SAI_SWITCH_ATTR_PRE_SHUTDOWN;
+                attr.value.booldata = true;
+
+                status = sai_switch_api->set_switch_attribute(gSwitchId, &attr);
+
+                if (status == SAI_STATUS_SUCCESS)
+                {
+                    warmRestartTable->hset("warm-shutdown", "state", "pre-shutdown-succeeded");
+
+                    s = std::make_shared<swss::Select>(); // make sure previous select is destroyed
+
+                    s->addSelectable(restartQuery.get());
+
+                    SWSS_LOG_NOTICE("switched to PRE_SHUTDOWN, from now on accepting only shurdown requests");
                 }
                 else
                 {
-                    sai_attribute_t attr;
+                    SWSS_LOG_ERROR("Failed to set SAI_SWITCH_ATTR_PRE_SHUTDOWN=true: %s",
+                            sai_serialize_status(status).c_str());
 
+                    warmRestartTable->hset("warm-shutdown", "state", "pre-shutdown-failed");
+
+                    // Restore cold shutdown.
                     attr.id = SAI_SWITCH_ATTR_RESTART_WARM;
-                    attr.value.booldata = true;
-
+                    attr.value.booldata = false;
                     status = sai_switch_api->set_switch_attribute(gSwitchId, &attr);
-
-                    if (status != SAI_STATUS_SUCCESS)
-                    {
-                        SWSS_LOG_ERROR("Failed to set SAI_SWITCH_ATTR_RESTART_WARM=true: %s for pre-shutdown",
-                                sai_serialize_status(status).c_str());
-
-                        shutdownType = SYNCD_RESTART_TYPE_COLD;
-
-                        warmRestartTable->hset("warm-shutdown", "state", "set-flag-failed");
-                        continue;
-                    }
-
-                    attr.id = SAI_SWITCH_ATTR_PRE_SHUTDOWN;
-                    attr.value.booldata = true;
-
-                    status = sai_switch_api->set_switch_attribute(gSwitchId, &attr);
-
-                    if (status == SAI_STATUS_SUCCESS)
-                    {
-                        warmRestartTable->hset("warm-shutdown", "state", "pre-shutdown-succeeded");
-
-                        s = std::make_shared<swss::Select>(); // make sure previous select is destroyed
-
-                        s->addSelectable(restartQuery.get());
-
-                        SWSS_LOG_NOTICE("switched to PRE_SHUTDOWN, from now on accepting only shurdown requests");
-                    }
-                    else
-                    {
-                        SWSS_LOG_ERROR("Failed to set SAI_SWITCH_ATTR_PRE_SHUTDOWN=true: %s",
-                                sai_serialize_status(status).c_str());
-
-                        warmRestartTable->hset("warm-shutdown", "state", "pre-shutdown-failed");
-
-                        // Restore cold shutdown.
-                        attr.id = SAI_SWITCH_ATTR_RESTART_WARM;
-                        attr.value.booldata = false;
-                        status = sai_switch_api->set_switch_attribute(gSwitchId, &attr);
-                    }
                 }
             }
             else if (sel == flexCounter.get())
@@ -3787,15 +3761,6 @@ int syncd_main(int argc, char **argv)
         else
         {
             SWSS_LOG_NOTICE("Warm Reboot requested, keeping data plane running");
-
-
-            /* FIXME: W/A */
-            char* platform = getenv("platform");
-            if (platform && (strncmp(platform, "mellanox", 8) == 0))
-            {
-                warmRestartTable->hset("warm-shutdown", "state", "warm-shutdown-succeeded");
-                return EXIT_SUCCESS;
-            }
 
             sai_attribute_t attr;
 
