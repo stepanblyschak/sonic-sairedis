@@ -1626,7 +1626,7 @@ void InspectAsic()
     }
 }
 
-void mlnxFastFastConfigDone()
+sai_status_t onApplyViewInFastFastBoot()
 {
     SWSS_LOG_ENTER();
 
@@ -1644,6 +1644,8 @@ void mlnxFastFastConfigDone()
     {
         SWSS_LOG_ERROR("Failed to set SAI_SWITCH_ATTR_FAST_API_ENABLE=false: %s", sai_serialize_status(status).c_str());
     }
+
+    return status;
 }
 
 sai_status_t notifySyncd(
@@ -1677,6 +1679,8 @@ sai_status_t notifySyncd(
     {
         SWSS_LOG_NOTICE("very first run is TRUE, op = %s", op.c_str());
 
+        sai_status_t status = SAI_STATUS_SUCCESS;
+
         /*
          * On the very first start of syncd, "compile" view is directly applied
          * on device, since it will make it easier to switch to new asic state
@@ -1709,7 +1713,7 @@ sai_status_t notifySyncd(
             if (options.startType == SAI_FASTFAST_BOOT)
             {
                 /* fastfast boot configuration end */
-                mlnxFastFastConfigDone();
+                status = onApplyViewInFastFastBoot();
             }
 
             SWSS_LOG_NOTICE("setting very first run to FALSE, op = %s", op.c_str());
@@ -1719,9 +1723,9 @@ sai_status_t notifySyncd(
             SWSS_LOG_THROW("unknown operation: %s", op.c_str());
         }
 
-        sendNotifyResponse(SAI_STATUS_SUCCESS);
+        sendNotifyResponse(status);
 
-        return SAI_STATUS_SUCCESS;
+        return status;
     }
 
     if (op == SYNCD_INIT_VIEW)
@@ -3681,6 +3685,7 @@ int syncd_main(int argc, char **argv)
 
                 sai_attribute_t attr;
 
+                attr.id = SAI_SWITCH_ATTR_RESTART_WARM;
                 attr.value.booldata = true;
 
                 status = sai_switch_api->set_switch_attribute(gSwitchId, &attr);
