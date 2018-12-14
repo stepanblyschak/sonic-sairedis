@@ -3786,7 +3786,7 @@ int syncd_main(int argc, char **argv)
 
     SWSS_LOG_NOTICE("Removing the switch gSwitchId=0x%lx", gSwitchId);
 
-#ifdef SAI_SWITCH_ATTR_UNINIT_DATA_PLANE_ON_REMOVAL
+#ifdef SAI_SUPPORT_UNINIT_DATA_PLANE_ON_REMOVAL
 
     if (shutdownType == SYNCD_RESTART_TYPE_FAST || shutdownType == SYNCD_RESTART_TYPE_WARM)
     {

@@ -38,7 +38,7 @@ syncd_LDADD += -lrpcserver -lthrift
 endif
 
 if sonic_asic_platform_mellanox
-syncd_CPPFLAGS += -DSAI_SWITCH_ATTR_UNINIT_DATA_PLANE_ON_REMOVAL
+syncd_CPPFLAGS += -DSAI_SUPPORT_UNINIT_DATA_PLANE_ON_REMOVAL
 endif
 
 syncd_request_shutdown_SOURCES = syncd_request_shutdown.cpp
