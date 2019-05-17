@@ -66,24 +66,30 @@ libsaimeta_la_SOURCES =  \
 
 libsaimeta_la_CFLAGS = $(DBGFLAGS) $(WARN)
 
-../SAI/meta/saimetadata.h ../SAI/meta/saimetadata.c:
+../SAI/meta/saimetadata.h:
 	make -C ../SAI/meta
+
+../SAI/meta/saimetadata.c: ../SAI/meta/saimetadata.h
 
 clean-local:
 	make -C ../SAI/meta clean
+
 
 libsaimetadata_la_SOURCES = \
 							sai_meta.cpp \
 							saiattributelist.cpp \
 							saiserialize.cpp
 
+$(libsaimeta_la_SOURCES): ../SAI/meta/saimetadata.h
+$(libsaimetadata_la_SOURCES): ../SAI/meta/saimetadata.h
+
 libsaimetadata_la_CPPFLAGS = $(DBGFLAGS) $(AM_CPPFLAGS) $(CFLAGS_COMMON)
 libsaimetadata_la_LIBADD = -lhiredis -lswsscommon libsaimeta.la
 
-bin_PROGRAMS = tests
+#bin_PROGRAMS = tests
 
-tests_SOURCES = tests.cpp
-tests_CPPFLAGS = $(DBGFLAGS) $(AM_CPPFLAGS) $(CFLAGS_COMMON)
-tests_LDADD = -lhiredis -lswsscommon -lpthread -L$(top_dir)/meta/.libs -lsaimetadata -lsaimeta
+#tests_SOURCES = tests.cpp
+#tests_CPPFLAGS = $(DBGFLAGS) $(AM_CPPFLAGS) $(CFLAGS_COMMON)
+#tests_LDADD = -lhiredis -lswsscommon -lpthread -L$(top_dir)/meta/.libs -lsaimetadata -lsaimeta
 
-TESTS = tests
+#TESTS = tests
