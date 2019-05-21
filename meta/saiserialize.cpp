@@ -1312,6 +1312,7 @@ std::string sai_serialize_acl_capability(
     return mandatory + ":" + list;
 }
 
+
 std::string sai_serialize_attr_value(
         _In_ const sai_attr_metadata_t& meta,
         _In_ const sai_attribute_t &attr,
@@ -2343,6 +2344,26 @@ void sai_deserialize_acl_action(
     }
 }
 
+void sai_deserialize_acl_capability(
+        _In_ const std::string& s,
+        _Out_ sai_acl_capability_t& cap)
+{
+    SWSS_LOG_ENTER();
+
+    auto pos = s.find(":");
+
+    if (pos == std::string::npos)
+    {
+        SWSS_LOG_THROW("Invalid acl capability %s", s);
+    }
+
+    auto mandatory_on_create_str = s.substr(0, pos);
+    auto list = s.substr(pos + 1);
+
+    sai_deserialize_bool(mandatory_on_create_str, cap.is_action_list_mandatory);
+    sai_deserialize_enum_list(list, &sai_metadata_enum_sai_acl_action_type_t, cap.action_list, false);
+}
+
 void sai_deserialize_attr_value(
         _In_ const std::string& s,
         _In_ const sai_attr_metadata_t& meta,
@@ -2477,6 +2498,9 @@ void sai_deserialize_attr_value(
         case SAI_ATTR_VALUE_TYPE_ACL_ACTION_DATA_OBJECT_ID:
         case SAI_ATTR_VALUE_TYPE_ACL_ACTION_DATA_OBJECT_LIST:
             return sai_deserialize_acl_action(s, meta, attr.value.aclaction, countOnly);
+
+        case SAI_ATTR_VALUE_TYPE_ACL_CAPABILITY:
+            return sai_deserialize_acl_capability(s, attr.value.aclcapability);
 
         default:
             SWSS_LOG_THROW("deserialize type %d is not supportd yet FIXME", meta.attrvaluetype);
@@ -2896,6 +2920,10 @@ void sai_deserialize_free_attribute_value(
 
         case SAI_ATTR_VALUE_TYPE_ACL_ACTION_DATA_OBJECT_LIST:
             sai_free_list(attr.value.aclaction.parameter.objlist);
+            break;
+
+        case SAI_ATTR_VALUE_TYPE_ACL_CAPABILITY:
+            sai_free_list(attr.value.aclcapability.action_list);
             break;
 
         default:
