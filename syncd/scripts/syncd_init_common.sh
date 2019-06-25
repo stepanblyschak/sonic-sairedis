@@ -24,16 +24,14 @@ fi
 # Use temporary view between init and apply
 CMD_ARGS+=" -u"
 
-BOOT_TYPE="$(cat /proc/cmdline | grep -o 'SONIC_BOOT_TYPE=\S*' | cut -d'=' -f2)"
-
-case "$BOOT_TYPE" in
-  fast-reboot)
-     FAST_REBOOT='yes'
-    ;;
-  fastfast)
+case "$(cat /proc/cmdline)" in
+  *fastfast*)
     if [ -e /var/warmboot/warm-starting ]; then
         FASTFAST_REBOOT='yes'
     fi
+    ;;
+  *fast*)
+     FAST_REBOOT='yes'
     ;;
   *)
      FAST_REBOOT='no'
