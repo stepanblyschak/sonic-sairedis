@@ -25,12 +25,12 @@ fi
 CMD_ARGS+=" -u"
 
 case "$(cat /proc/cmdline)" in
-  *fastfast*)
+  *SONIC_BOOT_TYPE=fastfast*)
     if [ -e /var/warmboot/warm-starting ]; then
         FASTFAST_REBOOT='yes'
     fi
     ;;
-  *fast*)
+  *SONIC_BOOT_TYPE=fast*|fast-reboot*)
      FAST_REBOOT='yes'
     ;;
   *)
