@@ -2112,6 +2112,10 @@ sai_status_t meta_generic_validation_set(
                     break;
                 }
 
+        case SAI_ATTR_VALUE_TYPE_ACL_CAPABILITY:
+            VALIDATION_LIST(md, value.aclcapability.action_list);
+            break;
+
         default:
 
             META_LOG_THROW(md, "serialization type is not supported yet FIXME");
@@ -3194,6 +3198,7 @@ void meta_generic_validation_post_set(
         case SAI_ATTR_VALUE_TYPE_UINT32_RANGE:
         case SAI_ATTR_VALUE_TYPE_INT32_RANGE:
         case SAI_ATTR_VALUE_TYPE_ACL_RESOURCE_LIST:
+        case SAI_ATTR_VALUE_TYPE_ACL_CAPABILITY:
             // no special action required
             break;
 
