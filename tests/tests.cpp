@@ -6,7 +6,6 @@
 #include <assert.h>
 
 #include "lib/inc/ZeroMQChannel.h"
-#include "lib/inc/Recorder.h"
 #include "syncd/ZeroMQNotificationProducer.h"
 
 #include "meta/sai_serialize.h"
