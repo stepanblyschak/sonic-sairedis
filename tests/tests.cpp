@@ -21,7 +21,6 @@ using namespace syncd;
 
 const std::string SairedisRecFilename = "sairedis.rec";
 
-
 /*
  * Test if destructor proper clean and join zeromq socket and context, and
  * break recv method.
@@ -89,7 +88,7 @@ static void test_zeromqchannel_first_notification()
     }
 }
 
-std::vector<std::string> parseQueryLine()
+std::vector<std::string> parseFirstRecordedAPI()
 {
     const auto delimiter = '|';
     std::ifstream infile(SairedisRecFilename);
@@ -133,7 +132,7 @@ void test_recorder_enum_value_capability_query_request(
         &enum_values_capability
     );
 
-    auto tokens = parseQueryLine();
+    auto tokens = parseFirstRecordedAPI();
     ASSERT_EQ(tokens.size(), expectedOutput.size());
     for (std::size_t i = 0; i < tokens.size(); i++)
     {
@@ -168,7 +167,7 @@ void test_recorder_enum_value_capability_query_response(
         &enum_values_capability
     );
 
-    auto tokens = parseQueryLine();
+    auto tokens = parseFirstRecordedAPI();
     ASSERT_EQ(tokens.size(), expectedOutput.size());
     for (std::size_t i = 0; i < tokens.size(); i++)
     {
