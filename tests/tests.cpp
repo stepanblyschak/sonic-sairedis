@@ -133,11 +133,7 @@ void test_recorder_enum_value_capability_query_request(
     );
 
     auto tokens = parseFirstRecordedAPI();
-    ASSERT_EQ(tokens.size(), expectedOutput.size());
-    for (std::size_t i = 0; i < tokens.size(); i++)
-    {
-        ASSERT_EQ(tokens[i], expectedOutput[i]);
-    }
+    ASSERT_EQ(tokens, expectedOutput);
 }
 
 void test_recorder_enum_value_capability_query_response(
@@ -168,11 +164,7 @@ void test_recorder_enum_value_capability_query_response(
     );
 
     auto tokens = parseFirstRecordedAPI();
-    ASSERT_EQ(tokens.size(), expectedOutput.size());
-    for (std::size_t i = 0; i < tokens.size(); i++)
-    {
-        ASSERT_EQ(tokens[i], expectedOutput[i]);
-    }
+    ASSERT_EQ(tokens, expectedOutput);
 }
 
 void test_recorder_enum_value_capability_query()
