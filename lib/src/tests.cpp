@@ -769,6 +769,8 @@ static sai_object_type_t deserialize_object_type(
 
 static std::vector<std::string> parseFirstRecordedAPI()
 {
+    SWSS_LOG_ENTER();
+
     const auto delimiter = '|';
     std::ifstream infile(SairedisRecFilename);
     std::string line;
