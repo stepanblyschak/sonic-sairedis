@@ -3,6 +3,8 @@
 #include "../../lib/inc/PerformanceIntervalTimer.h"
 
 #include "swss/logger.h"
+#include "swss/exec.h"
+#include "swss/converter.h"
 
 #include "meta/sai_serialize.h"
 #include "meta/SaiAttributeList.h"
@@ -817,6 +819,26 @@ sai_status_t VirtualSwitchSaiInterface::objectTypeGetAvailability(
         *count = 3;
         return SAI_STATUS_SUCCESS;
     }
+    // MPLS Inseg and MPLS NH CRM use sai_object_type_get_availability() API.
+    else if ((objectType == SAI_OBJECT_TYPE_INSEG_ENTRY) ||
+             ((objectType == SAI_OBJECT_TYPE_NEXT_HOP) &&
+              (attrCount == 1) && attrList &&
+              (attrList[0].id == SAI_NEXT_HOP_ATTR_TYPE) &&
+              (attrList[0].value.s32 == SAI_NEXT_HOP_TYPE_MPLS)))
+    {
+        std::string cmd_str("sysctl net.mpls.platform_labels");
+        std::string ret_str;
+        *count = 1000;
+        if (!swss::exec(cmd_str, ret_str))
+        {
+            std::string match("net.mpls.platform_labels = ");
+            if (ret_str.find(match) != std::string::npos)
+            {
+                *count = std::stoul(ret_str.substr(match.length()).c_str());
+            }
+        }
+        return SAI_STATUS_SUCCESS;
+    }
 
     return SAI_STATUS_NOT_SUPPORTED;
 }
@@ -876,6 +898,21 @@ sai_status_t VirtualSwitchSaiInterface::queryAattributeEnumValuesCapability(
         enum_values_capability->count = 2;
         enum_values_capability->list[0] = SAI_OUT_DROP_REASON_L2_ANY;
         enum_values_capability->list[1] = SAI_OUT_DROP_REASON_L3_ANY;
+
+        return SAI_STATUS_SUCCESS;
+    }
+    else if (object_type == SAI_OBJECT_TYPE_DEBUG_COUNTER && attr_id == SAI_DEBUG_COUNTER_ATTR_TYPE)
+    {
+        if (enum_values_capability->count < 4)
+        {
+            return SAI_STATUS_BUFFER_OVERFLOW;
+        }
+
+        enum_values_capability->count = 4;
+        enum_values_capability->list[0] = SAI_DEBUG_COUNTER_TYPE_PORT_IN_DROP_REASONS;
+        enum_values_capability->list[1] = SAI_DEBUG_COUNTER_TYPE_PORT_OUT_DROP_REASONS;
+        enum_values_capability->list[2] = SAI_DEBUG_COUNTER_TYPE_SWITCH_IN_DROP_REASONS;
+        enum_values_capability->list[3] = SAI_DEBUG_COUNTER_TYPE_SWITCH_OUT_DROP_REASONS;
 
         return SAI_STATUS_SUCCESS;
     }

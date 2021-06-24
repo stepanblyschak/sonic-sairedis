@@ -6,6 +6,7 @@
 #include "sairediscommon.h"
 #include "PerformanceIntervalTimer.h"
 #include "NotificationFactory.h"
+#include "ClientConfig.h"
 
 #include "swss/logger.h"
 
@@ -65,14 +66,26 @@ sai_status_t ClientSai::initialize(
         return SAI_STATUS_FAILURE;
     }
 
+    if ((service_method_table == NULL) ||
+            (service_method_table->profile_get_next_value == NULL) ||
+            (service_method_table->profile_get_value == NULL))
+    {
+        SWSS_LOG_ERROR("invalid service_method_table handle passed to SAI API initialize");
+
+        return SAI_STATUS_INVALID_PARAMETER;
+    }
+
     // TODO support context config
 
     m_switchContainer = std::make_shared<SwitchContainer>();
 
-    // TODO from config/method table
+    auto clientConfig = service_method_table->profile_get_value(0, SAI_REDIS_KEY_CLIENT_CONFIG);
+
+    auto cc = ClientConfig::loadFromFile(clientConfig);
+
     m_communicationChannel = std::make_shared<ZeroMQChannel>(
-            "ipc:///tmp/saiServer",
-            "ipc:///tmp/saiServerNtf",
+            cc->m_zmqEndpoint,
+            cc->m_zmqNtfEndpoint,
             std::bind(&ClientSai::handleNotification, this, _1, _2, _3));
 
     m_apiInitialized = true;
@@ -746,8 +759,8 @@ sai_status_t ClientSai::waitForQueryAttributeCapabilityResponse(
         capability->get_implemented    = (fvValue(values[2]) == "true" ? true : false);
 
         SWSS_LOG_DEBUG("Received payload: create_implemented:%s, set_implemented:%s, get_implemented:%s",
-            (capability->create_implemented ? "true" : "false"), 
-            (capability->set_implemented ? "true" : "false"), 
+            (capability->create_implemented ? "true" : "false"),
+            (capability->set_implemented ? "true" : "false"),
             (capability->get_implemented ? "true" : "false"));
     }
 
@@ -1012,40 +1025,40 @@ sai_status_t ClientSai::bulkCreate(
 
     // TODO support mode
 
-    SWSS_LOG_THROW("TODO, not implemented, FIXME");
+    std::vector<std::string> serialized_object_ids;
 
-    //for (uint32_t idx = 0; idx < object_count; idx++)
-    //{
-    //    object_id[idx] = m_virtualObjectIdManager->allocateNewObjectId(object_type, switch_id);
+    // server is responsible for generate new OID but for that we need switch ID
+    // to be sent to server as well, so instead of sending empty oids we will
+    // send switch IDs
+    for (uint32_t idx = 0; idx < object_count; idx++)
+    {
+        serialized_object_ids.emplace_back(sai_serialize_object_id(switch_id));
+    }
 
-    //    if (object_id[idx] == SAI_NULL_OBJECT_ID)
-    //    {
-    //        SWSS_LOG_ERROR("failed to create %s, with switch id: %s",
-    //                sai_serialize_object_type(object_type).c_str(),
-    //                sai_serialize_object_id(switch_id).c_str());
+    auto status = bulkCreate(
+            object_type,
+            serialized_object_ids,
+            attr_count,
+            attr_list,
+            mode,
+            object_statuses);
 
-    //        return SAI_STATUS_INSUFFICIENT_RESOURCES;
-    //    }
-    //}
+    for (uint32_t idx = 0; idx < object_count; idx++)
+    {
+        // since user requested create, OID value was created remotely and it
+        // was returned in m_lastCreateOids
 
-    //std::vector<std::string> serialized_object_ids;
+        if (object_statuses[idx] == SAI_STATUS_SUCCESS)
+        {
+            object_id[idx] = m_lastCreateOids.at(idx);
+        }
+        else
+        {
+            object_id[idx] = SAI_NULL_OBJECT_ID;
+        }
+    }
 
-    //// on create vid is put in db by syncd
-    //for (uint32_t idx = 0; idx < object_count; idx++)
-    //{
-    //    std::string str_object_id = sai_serialize_object_id(object_id[idx]);
-    //    serialized_object_ids.push_back(str_object_id);
-    //}
-
-    //auto status = bulkCreate(
-    //        object_type,
-    //        serialized_object_ids,
-    //        attr_count,
-    //        attr_list,
-    //        mode,
-    //        object_statuses);
-    
-    // TODO m_lastCreateOids
+    return status;
 }
 
 sai_status_t ClientSai::bulkCreate(
