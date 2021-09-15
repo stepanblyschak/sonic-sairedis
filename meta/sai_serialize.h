@@ -141,6 +141,9 @@ std::string sai_serialize_hex_binary(
 std::string sai_serialize_macsec_sa_attr(
         _In_ const  sai_macsec_sa_attr_t &attr);
 
+std::string sai_serialize_acl_counter_attr(
+        _In_ const  sai_acl_counter_attr_t &attr);
+
 std::string sai_serialize_switch_oper_status(
         _In_ sai_object_id_t switch_id,
         _In_ sai_switch_oper_status_t status);
@@ -372,7 +375,7 @@ void sai_deserialize_free_queue_deadlock_ntf(
 
 void sai_deserialize_free_bfd_session_state_ntf(
         _In_ uint32_t count,
-        _In_ sai_bfd_session_state_notification_t* bfdsessionstate);    
+        _In_ sai_bfd_session_state_notification_t* bfdsessionstate);
 
 void sai_deserialize_ingress_priority_group_attr(
         _In_ const std::string& s,
@@ -385,6 +388,10 @@ void sai_deserialize_queue_attr(
 void sai_deserialize_macsec_sa_attr(
         _In_ const std::string& s,
         _Out_ sai_macsec_sa_attr_t& attr);
+
+void sai_deserialize_acl_counter_attr(
+        _In_ const std::string& s,
+        _Out_ sai_acl_counter_attr_t& attr);
 
 // sairedis
 
