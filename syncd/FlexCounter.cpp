@@ -1569,13 +1569,17 @@ void FlexCounter::collectAclCounterAttrs(
         for (const auto& aclCounterAttr : aclCounterAttrs)
         {
             auto meta = sai_metadata_get_attr_metadata(SAI_OBJECT_TYPE_ACL_COUNTER, aclCounterAttr.id);
+            if (!meta)
+            {
+                SWSS_LOG_THROW("Failed to get metadata for SAI_OBJECT_TYPE_ACL_COUNTER");
+            }
             values.emplace_back(meta->attridname, sai_serialize_attr_value(*meta, aclCounterAttr));
         }
 
         // Write counters to DB
-        std::string aclCounterVidStr = sai_serialize_object_id(aclCounterVid);
+        auto aclCounterVidStr = sai_serialize_object_id(aclCounterVid);
 
-        countersTable.set(aclCounterVidStr, values, "");
+        countersTable.set(aclCounterVidStr, values);
     }
 }
 
