@@ -824,7 +824,6 @@ void FlexCounter::removeAclCounter(
     }
 }
 
-
 void FlexCounter::removeRif(
         _In_ sai_object_id_t rifVid)
 {
@@ -1695,7 +1694,6 @@ void FlexCounter::collectAclCounterAttrs(
         countersTable.set(aclCounterVidStr, values);
     }
 }
-
 
 void FlexCounter::collectRifCounters(
         _In_ swss::Table &countersTable)
