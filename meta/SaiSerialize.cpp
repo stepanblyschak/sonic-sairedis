@@ -1,4 +1,6 @@
 #include "sai_serialize.h"
+#include "sairediscommon.h"
+
 #include "swss/tokenize.h"
 
 #pragma GCC diagnostic push
@@ -155,9 +157,9 @@ sai_status_t transfer_attribute(
             transfer_primitive(src_attr.value.u16, dst_attr.value.u16);
             break;
 
-        case SAI_ATTR_VALUE_TYPE_INT16:
-            transfer_primitive(src_attr.value.s16, dst_attr.value.s16);
-            break;
+//        case SAI_ATTR_VALUE_TYPE_INT16:
+//            transfer_primitive(src_attr.value.s16, dst_attr.value.s16);
+//            break;
 
         case SAI_ATTR_VALUE_TYPE_UINT32:
             transfer_primitive(src_attr.value.u32, dst_attr.value.u32);
@@ -171,9 +173,9 @@ sai_status_t transfer_attribute(
             transfer_primitive(src_attr.value.u64, dst_attr.value.u64);
             break;
 
-        case SAI_ATTR_VALUE_TYPE_INT64:
-            transfer_primitive(src_attr.value.s64, dst_attr.value.s64);
-            break;
+//        case SAI_ATTR_VALUE_TYPE_INT64:
+//            transfer_primitive(src_attr.value.s64, dst_attr.value.s64);
+//            break;
 
         case SAI_ATTR_VALUE_TYPE_MAC:
             transfer_primitive(src_attr.value.mac, dst_attr.value.mac);
@@ -215,13 +217,13 @@ sai_status_t transfer_attribute(
             RETURN_ON_ERROR(transfer_list(src_attr.value.s8list, dst_attr.value.s8list, countOnly));
             break;
 
-        case SAI_ATTR_VALUE_TYPE_UINT16_LIST:
-            RETURN_ON_ERROR(transfer_list(src_attr.value.u16list, dst_attr.value.u16list, countOnly));
-            break;
-
-        case SAI_ATTR_VALUE_TYPE_INT16_LIST:
-            RETURN_ON_ERROR(transfer_list(src_attr.value.s16list, dst_attr.value.s16list, countOnly));
-            break;
+//        case SAI_ATTR_VALUE_TYPE_UINT16_LIST:
+//            RETURN_ON_ERROR(transfer_list(src_attr.value.u16list, dst_attr.value.u16list, countOnly));
+//            break;
+//
+//        case SAI_ATTR_VALUE_TYPE_INT16_LIST:
+//            RETURN_ON_ERROR(transfer_list(src_attr.value.s16list, dst_attr.value.s16list, countOnly));
+//            break;
 
         case SAI_ATTR_VALUE_TYPE_UINT32_LIST:
             RETURN_ON_ERROR(transfer_list(src_attr.value.u32list, dst_attr.value.u32list, countOnly));
@@ -235,8 +237,12 @@ sai_status_t transfer_attribute(
             transfer_primitive(src_attr.value.u32range, dst_attr.value.u32range);
             break;
 
-        case SAI_ATTR_VALUE_TYPE_INT32_RANGE:
-            transfer_primitive(src_attr.value.s32range, dst_attr.value.s32range);
+//        case SAI_ATTR_VALUE_TYPE_INT32_RANGE:
+//            transfer_primitive(src_attr.value.s32range, dst_attr.value.s32range);
+//            break;
+
+        case SAI_ATTR_VALUE_TYPE_TIMESPEC:
+            transfer_primitive(src_attr.value.timespec, dst_attr.value.timespec);
             break;
 
         case SAI_ATTR_VALUE_TYPE_VLAN_LIST:
@@ -255,6 +261,10 @@ sai_status_t transfer_attribute(
             RETURN_ON_ERROR(transfer_list(src_attr.value.ipaddrlist, dst_attr.value.ipaddrlist, countOnly));
             break;
 
+        case SAI_ATTR_VALUE_TYPE_SEGMENT_LIST:
+            RETURN_ON_ERROR(transfer_list(src_attr.value.segmentlist, dst_attr.value.segmentlist, countOnly));
+            break;
+
             /* ACL FIELD DATA */
 
         case SAI_ATTR_VALUE_TYPE_ACL_FIELD_DATA_BOOL:
@@ -268,11 +278,11 @@ sai_status_t transfer_attribute(
             transfer_primitive(src_attr.value.aclfield.data.u8, dst_attr.value.aclfield.data.u8);
             break;
 
-        case SAI_ATTR_VALUE_TYPE_ACL_FIELD_DATA_INT8:
-            transfer_primitive(src_attr.value.aclfield.enable, dst_attr.value.aclfield.enable);
-            transfer_primitive(src_attr.value.aclfield.mask.s8, dst_attr.value.aclfield.mask.s8);
-            transfer_primitive(src_attr.value.aclfield.data.s8, dst_attr.value.aclfield.data.s8);
-            break;
+//        case SAI_ATTR_VALUE_TYPE_ACL_FIELD_DATA_INT8:
+//            transfer_primitive(src_attr.value.aclfield.enable, dst_attr.value.aclfield.enable);
+//            transfer_primitive(src_attr.value.aclfield.mask.s8, dst_attr.value.aclfield.mask.s8);
+//            transfer_primitive(src_attr.value.aclfield.data.s8, dst_attr.value.aclfield.data.s8);
+//            break;
 
         case SAI_ATTR_VALUE_TYPE_ACL_FIELD_DATA_UINT16:
             transfer_primitive(src_attr.value.aclfield.enable, dst_attr.value.aclfield.enable);
@@ -280,11 +290,11 @@ sai_status_t transfer_attribute(
             transfer_primitive(src_attr.value.aclfield.data.u16, dst_attr.value.aclfield.data.u16);
             break;
 
-        case SAI_ATTR_VALUE_TYPE_ACL_FIELD_DATA_INT16:
-            transfer_primitive(src_attr.value.aclfield.enable, dst_attr.value.aclfield.enable);
-            transfer_primitive(src_attr.value.aclfield.mask.s16, dst_attr.value.aclfield.mask.s16);
-            transfer_primitive(src_attr.value.aclfield.data.s16, dst_attr.value.aclfield.data.s16);
-            break;
+//        case SAI_ATTR_VALUE_TYPE_ACL_FIELD_DATA_INT16:
+//            transfer_primitive(src_attr.value.aclfield.enable, dst_attr.value.aclfield.enable);
+//            transfer_primitive(src_attr.value.aclfield.mask.s16, dst_attr.value.aclfield.mask.s16);
+//            transfer_primitive(src_attr.value.aclfield.data.s16, dst_attr.value.aclfield.data.s16);
+//            break;
 
         case SAI_ATTR_VALUE_TYPE_ACL_FIELD_DATA_UINT32:
             transfer_primitive(src_attr.value.aclfield.enable, dst_attr.value.aclfield.enable);
@@ -350,21 +360,20 @@ sai_status_t transfer_attribute(
             transfer_primitive(src_attr.value.aclaction.parameter.u8, dst_attr.value.aclaction.parameter.u8);
             break;
 
-        case SAI_ATTR_VALUE_TYPE_ACL_ACTION_DATA_INT8:
-            transfer_primitive(src_attr.value.aclaction.enable, dst_attr.value.aclaction.enable);
-            transfer_primitive(src_attr.value.aclaction.parameter.s8, dst_attr.value.aclaction.parameter.s8);
-            break;
+//        case SAI_ATTR_VALUE_TYPE_ACL_ACTION_DATA_INT8:
+//            transfer_primitive(src_attr.value.aclaction.enable, dst_attr.value.aclaction.enable);
+//            transfer_primitive(src_attr.value.aclaction.parameter.s8, dst_attr.value.aclaction.parameter.s8);
+//            break;
 
         case SAI_ATTR_VALUE_TYPE_ACL_ACTION_DATA_UINT16:
             transfer_primitive(src_attr.value.aclaction.enable, dst_attr.value.aclaction.enable);
             transfer_primitive(src_attr.value.aclaction.parameter.u16, dst_attr.value.aclaction.parameter.u16);
             break;
 
-        case SAI_ATTR_VALUE_TYPE_ACL_ACTION_DATA_INT16:
-            transfer_primitive(src_attr.value.aclaction.enable, dst_attr.value.aclaction.enable);
-            transfer_primitive(src_attr.value.aclaction.parameter.s16, dst_attr.value.aclaction.parameter.s16);
-            break;
-
+//        case SAI_ATTR_VALUE_TYPE_ACL_ACTION_DATA_INT16:
+//            transfer_primitive(src_attr.value.aclaction.enable, dst_attr.value.aclaction.enable);
+//            transfer_primitive(src_attr.value.aclaction.parameter.s16, dst_attr.value.aclaction.parameter.s16);
+//            break;
 
         case SAI_ATTR_VALUE_TYPE_ACL_ACTION_DATA_UINT32:
             transfer_primitive(src_attr.value.aclaction.enable, dst_attr.value.aclaction.enable);
@@ -391,6 +400,11 @@ sai_status_t transfer_attribute(
             transfer_primitive(src_attr.value.aclaction.parameter.ip6, dst_attr.value.aclaction.parameter.ip6);
             break;
 
+        case SAI_ATTR_VALUE_TYPE_ACL_ACTION_DATA_IP_ADDRESS:
+            transfer_primitive(src_attr.value.aclaction.enable, dst_attr.value.aclaction.enable);
+            transfer_primitive(src_attr.value.aclaction.parameter.ipaddr, dst_attr.value.aclaction.parameter.ipaddr);
+            break;
+
         case SAI_ATTR_VALUE_TYPE_ACL_ACTION_DATA_OBJECT_ID:
             transfer_primitive(src_attr.value.aclaction.enable, dst_attr.value.aclaction.enable);
             transfer_primitive(src_attr.value.aclaction.parameter.oid, dst_attr.value.aclaction.parameter.oid);
@@ -410,12 +424,56 @@ sai_status_t transfer_attribute(
             transfer_primitive(src_attr.value.sysportconfig, dst_attr.value.sysportconfig);
             break;
 
+        case SAI_ATTR_VALUE_TYPE_AUTH_KEY:
+            transfer_primitive(src_attr.value.authkey, dst_attr.value.authkey);
+            break;
+
+        case SAI_ATTR_VALUE_TYPE_MACSEC_AUTH_KEY:
+            transfer_primitive(src_attr.value.macsecauthkey, dst_attr.value.macsecauthkey);
+            break;
+
+        case SAI_ATTR_VALUE_TYPE_MACSEC_SALT:
+            transfer_primitive(src_attr.value.macsecsalt, dst_attr.value.macsecsalt);
+            break;
+
+        case SAI_ATTR_VALUE_TYPE_MACSEC_SAK:
+            transfer_primitive(src_attr.value.macsecsak, dst_attr.value.macsecsak);
+            break;
+
+        case SAI_ATTR_VALUE_TYPE_ENCRYPT_KEY:
+            transfer_primitive(src_attr.value.encrypt_key, dst_attr.value.encrypt_key);
+            break;
+
+        case SAI_ATTR_VALUE_TYPE_PORT_ERR_STATUS_LIST:
+            RETURN_ON_ERROR(transfer_list(src_attr.value.porterror, dst_attr.value.porterror, countOnly));
+            break;
+
+        case SAI_ATTR_VALUE_TYPE_PORT_EYE_VALUES_LIST:
+            RETURN_ON_ERROR(transfer_list(src_attr.value.porteyevalues, dst_attr.value.porteyevalues, countOnly));
+            break;
+
+        case SAI_ATTR_VALUE_TYPE_FABRIC_PORT_REACHABILITY:
+            transfer_primitive(src_attr.value.reachability, dst_attr.value.reachability);
+            break;
+
+        case SAI_ATTR_VALUE_TYPE_PRBS_RX_STATE:
+            transfer_primitive(src_attr.value.rx_state, dst_attr.value.rx_state);
+            break;
+
+        case SAI_ATTR_VALUE_TYPE_MAP_LIST:
+            RETURN_ON_ERROR(transfer_list(src_attr.value.maplist, dst_attr.value.maplist, countOnly));
+            break;
+
+        case SAI_ATTR_VALUE_TYPE_TLV_LIST:
+            RETURN_ON_ERROR(transfer_list(src_attr.value.tlvlist, dst_attr.value.tlvlist, countOnly));
+            break;
+
         case SAI_ATTR_VALUE_TYPE_SYSTEM_PORT_CONFIG_LIST:
             RETURN_ON_ERROR(transfer_list(src_attr.value.sysportconfiglist, dst_attr.value.sysportconfiglist, countOnly));
             break;
 
         default:
-            return SAI_STATUS_NOT_IMPLEMENTED;
+            SWSS_LOG_THROW("sai attr value %s is not implemented, FIXME", sai_serialize_attr_value_type(serialization_type).c_str());
     }
 
     return SAI_STATUS_SUCCESS;
@@ -1184,6 +1242,7 @@ static json sai_serialize_qos_map_params(
     j["qidx"]     = params.queue_index;
     j["mpls_exp"] = params.mpls_exp;
     j["color"]    = sai_serialize_packet_color(params.color);
+    j["fc"]       = params.fc;
 
     return j;
 }
@@ -1236,6 +1295,50 @@ std::string sai_serialize_qos_map_list(
     for (uint32_t i = 0; i < qosmap.count; ++i)
     {
         json item = sai_serialize_qos_map(qosmap.list[i]);
+
+        arr.push_back(item);
+    }
+
+    j["list"] = arr;
+
+    return j.dump();
+}
+
+json sai_serialize_map(
+    _In_ const sai_map_t &map)
+{
+    SWSS_LOG_ENTER();
+
+    json j;
+
+    j["key"] = map.key;
+    j["value"] = map.value;
+
+    return j;
+}
+
+std::string sai_serialize_map_list(
+    _In_ const sai_map_list_t &maplist,
+    _In_ bool countOnly)
+{
+    SWSS_LOG_ENTER();
+
+    json j;
+
+    j["count"] = maplist.count;
+
+    if (maplist.list == NULL || countOnly)
+    {
+        j["list"] = nullptr;
+
+        return j.dump();
+    }
+
+    json arr = json::array();
+
+    for (uint32_t i = 0; i < maplist.count; ++i)
+    {
+        json item = sai_serialize_map(maplist.list[i]);
 
         arr.push_back(item);
     }
@@ -1320,14 +1423,14 @@ std::string sai_serialize_acl_action(
         case SAI_ATTR_VALUE_TYPE_ACL_ACTION_DATA_UINT8:
             return sai_serialize_number(action.parameter.u8);
 
-        case SAI_ATTR_VALUE_TYPE_ACL_ACTION_DATA_INT8:
-            return sai_serialize_number(action.parameter.s8);
+//        case SAI_ATTR_VALUE_TYPE_ACL_ACTION_DATA_INT8:
+//            return sai_serialize_number(action.parameter.s8);
 
         case SAI_ATTR_VALUE_TYPE_ACL_ACTION_DATA_UINT16:
             return sai_serialize_number(action.parameter.u16);
 
-        case SAI_ATTR_VALUE_TYPE_ACL_ACTION_DATA_INT16:
-            return sai_serialize_number(action.parameter.s16);
+//        case SAI_ATTR_VALUE_TYPE_ACL_ACTION_DATA_INT16:
+//            return sai_serialize_number(action.parameter.s16);
 
         case SAI_ATTR_VALUE_TYPE_ACL_ACTION_DATA_UINT32:
             return sai_serialize_number(action.parameter.u32);
@@ -1344,6 +1447,9 @@ std::string sai_serialize_acl_action(
         case SAI_ATTR_VALUE_TYPE_ACL_ACTION_DATA_IPV6:
             return sai_serialize_ipv6(action.parameter.ip6);
 
+        case SAI_ATTR_VALUE_TYPE_ACL_ACTION_DATA_IP_ADDRESS:
+            return sai_serialize_ip_address(action.parameter.ipaddr);
+
         case SAI_ATTR_VALUE_TYPE_ACL_ACTION_DATA_OBJECT_ID:
             return sai_serialize_object_id(action.parameter.oid);
 
@@ -1351,7 +1457,7 @@ std::string sai_serialize_acl_action(
             return sai_serialize_oid_list(action.parameter.objlist, countOnly);
 
         default:
-            SWSS_LOG_THROW("FATAIL: invalid serialization type %d", meta.attrvaluetype);
+            SWSS_LOG_THROW("sai attr value %s is not implemented, FIXME", sai_serialize_attr_value_type(meta.attrvaluetype).c_str());
     }
 }
 
@@ -1376,14 +1482,14 @@ std::string sai_serialize_acl_field(
         case SAI_ATTR_VALUE_TYPE_ACL_FIELD_DATA_UINT8:
             return sai_serialize_number(field.data.u8) + "&mask:" + sai_serialize_number(field.mask.u8, true);
 
-        case SAI_ATTR_VALUE_TYPE_ACL_FIELD_DATA_INT8:
-            return sai_serialize_number(field.data.s8) + "&mask:" + sai_serialize_number(field.mask.s8, true);
+//        case SAI_ATTR_VALUE_TYPE_ACL_FIELD_DATA_INT8:
+//            return sai_serialize_number(field.data.s8) + "&mask:" + sai_serialize_number(field.mask.s8, true);
 
         case SAI_ATTR_VALUE_TYPE_ACL_FIELD_DATA_UINT16:
             return sai_serialize_number(field.data.u16) + "&mask:" + sai_serialize_number(field.mask.u16, true);
 
-        case SAI_ATTR_VALUE_TYPE_ACL_FIELD_DATA_INT16:
-            return sai_serialize_number(field.data.s16) + "&mask:" + sai_serialize_number(field.mask.s16, true);
+//        case SAI_ATTR_VALUE_TYPE_ACL_FIELD_DATA_INT16:
+//            return sai_serialize_number(field.data.s16) + "&mask:" + sai_serialize_number(field.mask.s16, true);
 
         case SAI_ATTR_VALUE_TYPE_ACL_FIELD_DATA_UINT32:
             return sai_serialize_number(field.data.u32) + "&mask:" + sai_serialize_number(field.mask.u32, true);
@@ -1413,7 +1519,7 @@ std::string sai_serialize_acl_field(
             return sai_serialize_number_list(field.data.u8list, countOnly) + "&mask:" + sai_serialize_number_list(field.mask.u8list, countOnly, true);
 
         default:
-            SWSS_LOG_THROW("FATAIL: invalid serialization type %d", meta.attrvaluetype);
+            SWSS_LOG_THROW("sai attr value %s is not implemented, FIXME", sai_serialize_attr_value_type(meta.attrvaluetype).c_str());
     }
 }
 
@@ -1524,6 +1630,39 @@ std::string sai_serialize_system_port_config_list(
     return j.dump();
 }
 
+std::string sai_serialize_segment_list(
+        _In_ const sai_segment_list_t& segmentlist,
+        _In_ bool countOnly)
+{
+    SWSS_LOG_ENTER();
+
+    std::string s = sai_serialize_number(segmentlist.count);
+
+    if (countOnly)
+    {
+        return s;
+    }
+
+    if (segmentlist.list == NULL || segmentlist.count == 0)
+    {
+        return s + ":null";
+    }
+
+    std::string l;
+
+    for (uint32_t i = 0; i < segmentlist.count; ++i)
+    {
+        l += sai_serialize_ipv6(segmentlist.list[i]);
+
+        if (i != segmentlist.count -1)
+        {
+            l += ",";
+        }
+    }
+
+    return s + ":" + l;
+}
+
 std::string sai_serialize_attr_value(
         _In_ const sai_attr_metadata_t& meta,
         _In_ const sai_attribute_t &attr,
@@ -1548,8 +1687,8 @@ std::string sai_serialize_attr_value(
         case SAI_ATTR_VALUE_TYPE_UINT16:
             return sai_serialize_number(attr.value.u16);
 
-        case SAI_ATTR_VALUE_TYPE_INT16:
-            return sai_serialize_number(attr.value.s16);
+//        case SAI_ATTR_VALUE_TYPE_INT16:
+//            return sai_serialize_number(attr.value.s16);
 
         case SAI_ATTR_VALUE_TYPE_UINT32:
             return sai_serialize_number(attr.value.u32);
@@ -1560,8 +1699,8 @@ std::string sai_serialize_attr_value(
         case SAI_ATTR_VALUE_TYPE_UINT64:
             return sai_serialize_number(attr.value.u64);
 
-        case SAI_ATTR_VALUE_TYPE_INT64:
-            return sai_serialize_number(attr.value.s64);
+//        case SAI_ATTR_VALUE_TYPE_INT64:
+//            return sai_serialize_number(attr.value.s64);
 
         case SAI_ATTR_VALUE_TYPE_MAC:
             return sai_serialize_mac(attr.value.mac);
@@ -1593,11 +1732,11 @@ std::string sai_serialize_attr_value(
         case SAI_ATTR_VALUE_TYPE_INT8_LIST:
             return sai_serialize_number_list(attr.value.s8list, countOnly);
 
-        case SAI_ATTR_VALUE_TYPE_UINT16_LIST:
-            return sai_serialize_number_list(attr.value.u16list, countOnly);
-
-        case SAI_ATTR_VALUE_TYPE_INT16_LIST:
-            return sai_serialize_number_list(attr.value.s16list, countOnly);
+//        case SAI_ATTR_VALUE_TYPE_UINT16_LIST:
+//            return sai_serialize_number_list(attr.value.u16list, countOnly);
+//
+//        case SAI_ATTR_VALUE_TYPE_INT16_LIST:
+//            return sai_serialize_number_list(attr.value.s16list, countOnly);
 
         case SAI_ATTR_VALUE_TYPE_UINT32_LIST:
             return sai_serialize_number_list(attr.value.u32list, countOnly);
@@ -1608,8 +1747,8 @@ std::string sai_serialize_attr_value(
         case SAI_ATTR_VALUE_TYPE_UINT32_RANGE:
             return sai_serialize_range(attr.value.u32range);
 
-        case SAI_ATTR_VALUE_TYPE_INT32_RANGE:
-            return sai_serialize_range(attr.value.s32range);
+//        case SAI_ATTR_VALUE_TYPE_INT32_RANGE:
+//            return sai_serialize_range(attr.value.s32range);
 
         case SAI_ATTR_VALUE_TYPE_VLAN_LIST:
             return sai_serialize_number_list(attr.value.vlanlist, countOnly);
@@ -1617,11 +1756,17 @@ std::string sai_serialize_attr_value(
         case SAI_ATTR_VALUE_TYPE_QOS_MAP_LIST:
             return sai_serialize_qos_map_list(attr.value.qosmap, countOnly);
 
+        case SAI_ATTR_VALUE_TYPE_MAP_LIST:
+            return sai_serialize_map_list(attr.value.maplist, countOnly);
+
         case SAI_ATTR_VALUE_TYPE_ACL_RESOURCE_LIST:
             return sai_serialize_acl_resource_list(attr.value.aclresource, countOnly);
 
         case SAI_ATTR_VALUE_TYPE_IP_ADDRESS_LIST:
             return sai_serialize_ip_address_list(attr.value.ipaddrlist, countOnly);
+
+        case SAI_ATTR_VALUE_TYPE_SEGMENT_LIST:
+            return sai_serialize_segment_list(attr.value.segmentlist, countOnly);
 
             // ACL FIELD DATA
 
@@ -1655,6 +1800,7 @@ std::string sai_serialize_attr_value(
         case SAI_ATTR_VALUE_TYPE_ACL_ACTION_DATA_IPV6:
         case SAI_ATTR_VALUE_TYPE_ACL_ACTION_DATA_OBJECT_ID:
         case SAI_ATTR_VALUE_TYPE_ACL_ACTION_DATA_OBJECT_LIST:
+        case SAI_ATTR_VALUE_TYPE_ACL_ACTION_DATA_IP_ADDRESS:
             return sai_serialize_acl_action(meta, attr.value.aclaction, countOnly);
 
         case SAI_ATTR_VALUE_TYPE_ACL_CAPABILITY:
@@ -1671,6 +1817,12 @@ std::string sai_serialize_attr_value(
         case SAI_ATTR_VALUE_TYPE_MACSEC_SALT:
             return sai_serialize_hex_binary(attr.value.macsecsalt);
 
+        case SAI_ATTR_VALUE_TYPE_AUTH_KEY:
+            return sai_serialize_hex_binary(attr.value.authkey);
+
+        case SAI_ATTR_VALUE_TYPE_ENCRYPT_KEY:
+            return sai_serialize_hex_binary(attr.value.encrypt_key);
+
         case SAI_ATTR_VALUE_TYPE_SYSTEM_PORT_CONFIG:
             return sai_serialize_system_port_config(meta, attr.value.sysportconfig);
 
@@ -1678,7 +1830,7 @@ std::string sai_serialize_attr_value(
             return sai_serialize_system_port_config_list(meta, attr.value.sysportconfiglist, countOnly);
 
         default:
-            SWSS_LOG_THROW("FATAL: invalid serialization type %d", meta.attrvaluetype);
+            SWSS_LOG_THROW("sai attr value type %s is not implemented, FIXME", sai_serialize_attr_value_type(meta.attrvaluetype).c_str());
     }
 }
 
@@ -1945,6 +2097,24 @@ std::string sai_serialize_nat_entry(
     return j.dump();
 }
 
+std::string sai_serialize_my_sid_entry(
+        _In_ const sai_my_sid_entry_t& my_sid_entry)
+{
+    SWSS_LOG_ENTER();
+
+    json j;
+
+    j["switch_id"]          = sai_serialize_object_id(my_sid_entry.switch_id);
+    j["vr_id"]              = sai_serialize_object_id(my_sid_entry.vr_id);
+    j["locator_block_len"]  = sai_serialize_number(my_sid_entry.locator_block_len);
+    j["locator_node_len"]   = sai_serialize_number(my_sid_entry.locator_node_len);
+    j["function_len"]       = sai_serialize_number(my_sid_entry.function_len);
+    j["args_len"]           = sai_serialize_number(my_sid_entry.args_len);
+    j["sid"]                = sai_serialize_ipv6(my_sid_entry.sid);
+
+    return j.dump();
+}
+
 std::string sai_serialize_object_meta_key(
         _In_ const sai_object_meta_key_t& meta_key)
 {
@@ -1952,7 +2122,7 @@ std::string sai_serialize_object_meta_key(
 
     std::string key;
 
-    if (meta_key.objecttype == SAI_OBJECT_TYPE_NULL || meta_key.objecttype >= SAI_OBJECT_TYPE_EXTENSIONS_MAX)
+    if (!sai_metadata_is_object_type_valid(meta_key.objecttype))
     {
         SWSS_LOG_THROW("invalid object type value %s", sai_serialize_object_type(meta_key.objecttype).c_str());
     }
@@ -1981,6 +2151,22 @@ std::string sai_serialize_object_meta_key(
             key = sai_serialize_inseg_entry(meta_key.objectkey.key.inseg_entry);
             break;
 
+        case SAI_OBJECT_TYPE_MY_SID_ENTRY:
+            key = sai_serialize_my_sid_entry(meta_key.objectkey.key.my_sid_entry);
+            break;
+
+        case SAI_OBJECT_TYPE_L2MC_ENTRY:
+            key = sai_serialize_l2mc_entry(meta_key.objectkey.key.l2mc_entry);
+            break;
+
+        case SAI_OBJECT_TYPE_IPMC_ENTRY:
+            key = sai_serialize_ipmc_entry(meta_key.objectkey.key.ipmc_entry);
+            break;
+
+        case SAI_OBJECT_TYPE_MCAST_FDB_ENTRY:
+            key = sai_serialize_mcast_fdb_entry(meta_key.objectkey.key.mcast_fdb_entry);
+            break;
+
         default:
 
             if (meta->isnonobjectid)
@@ -2000,10 +2186,6 @@ std::string sai_serialize_object_meta_key(
     return key;
 }
 
-#define SYNCD_INIT_VIEW     "INIT_VIEW"
-#define SYNCD_APPLY_VIEW    "APPLY_VIEW"
-#define SYNCD_INSPECT_ASIC  "SYNCD_INSPECT_ASIC"
-
 std::string sai_serialize(
         _In_ const sai_redis_notify_syncd_t& value)
 {
@@ -2022,15 +2204,9 @@ std::string sai_serialize(
 
         default:
 
-            SWSS_LOG_WARN("unknown value on sai_redis_notify_syncd_t: %d", value);
-
-            return std::to_string(value);
+            SWSS_LOG_THROW("unknown value on sai_redis_notify_syncd_t: %d", value);
     }
 }
-
-#define REDIS_COMMUNICATION_MODE_REDIS_ASYNC_STRING "redis_async"
-#define REDIS_COMMUNICATION_MODE_REDIS_SYNC_STRING  "redis_sync"
-#define REDIS_COMMUNICATION_MODE_ZMQ_SYNC_STRING    "zmq_sync"
 
 std::string sai_serialize_redis_communication_mode(
         _In_ sai_redis_communication_mode_t value)
@@ -2050,9 +2226,7 @@ std::string sai_serialize_redis_communication_mode(
 
         default:
 
-            SWSS_LOG_WARN("unknown value on sai_redis_communication_mode_t: %d", value);
-
-            return std::to_string(value);
+            SWSS_LOG_THROW("unknown value on sai_redis_communication_mode_t: %d", value);
     }
 }
 
@@ -2374,6 +2548,16 @@ static void sai_deserialize_qos_map_params(
         params.mpls_exp       = j["mpls_exp"];
     }
 
+    if (j.find("fc") == j.end())
+    {
+        // for backward compatibility
+        params.fc       = 0;
+    }
+    else
+    {
+        params.fc       = j["fc"];
+    }
+
     sai_deserialize_packet_color(j["color"], params.color);
 }
 
@@ -2385,6 +2569,16 @@ static void sai_deserialize_qos_map(
 
     sai_deserialize_qos_map_params(j["key"], qosmap.key);
     sai_deserialize_qos_map_params(j["value"], qosmap.value);
+}
+
+void sai_deserialize_map(
+    _In_ const json &j,
+    _Out_ sai_map_t &map)
+{
+    SWSS_LOG_ENTER();
+
+    map.key =   j["key"];
+    map.value = j["value"];
 }
 
 void sai_deserialize_qos_map_list(
@@ -2423,6 +2617,45 @@ void sai_deserialize_qos_map_list(
         const json& item = arr[i];
 
         sai_deserialize_qos_map(item, qosmap.list[i]);
+    }
+}
+
+void sai_deserialize_map_list(
+    _In_ const std::string &s,
+    _Out_ sai_map_list_t &maplist,
+    _In_ bool countOnly)
+{
+    SWSS_LOG_ENTER();
+
+    json j = json::parse(s);
+
+    maplist.count = j["count"];
+
+    if (countOnly)
+    {
+        return;
+    }
+
+    if (j["list"] == nullptr)
+    {
+        maplist.list = NULL;
+        return;
+    }
+
+    json arr = j["list"];
+
+    if (arr.size() != (size_t)maplist.count)
+    {
+        SWSS_LOG_THROW("map list count mismatch %lu vs %u", arr.size(), maplist.count);
+    }
+
+    maplist.list = sai_alloc_n_of_ptr_type(maplist.count, maplist.list);
+
+    for (uint32_t i = 0; i < maplist.count; ++i)
+    {
+        const json &item = arr[i];
+
+        sai_deserialize_map(item, maplist.list[i]);
     }
 }
 
@@ -2481,8 +2714,7 @@ void sai_deserialize_acl_resource_list(
 
     if (arr.size() != (size_t)aclresource.count)
     {
-        SWSS_LOG_ERROR("acl resource count mismatch %lu vs %u", arr.size(), aclresource.count);
-        throw std::runtime_error("acl resource count mismatch");
+        SWSS_LOG_THROW("acl resource count mismatch %lu vs %u", arr.size(), aclresource.count);
     }
 
     aclresource.list = sai_alloc_n_of_ptr_type(aclresource.count, aclresource.list);
@@ -2595,6 +2827,53 @@ void sai_deserialize_ip_address_list(
     sai_deserialize_list(s, list, countOnly, [&](const std::string sitem, sai_ip_address_t& item) { sai_deserialize_ip_address(sitem, item);} );
 }
 
+void sai_deserialize_segment_list(
+        _In_ const std::string& s,
+        _Out_ sai_segment_list_t& list,
+        _In_ bool countOnly)
+{
+    SWSS_LOG_ENTER();
+
+    if (countOnly)
+    {
+        sai_deserialize_number(s, list.count);
+        return;
+    }
+
+    auto pos = s.find(":");
+
+    if (pos == std::string::npos)
+    {
+        SWSS_LOG_THROW("invalid list %s", s.c_str());
+    }
+
+    std::string scount = s.substr(0, pos);
+
+    sai_deserialize_number(scount, list.count);
+
+    std::string slist = s.substr(pos + 1);
+
+    if (slist == "null")
+    {
+        list.list = NULL;
+        return;
+    }
+
+    auto tokens = swss::tokenize(slist, ',');
+
+    if (tokens.size() != list.count)
+    {
+        SWSS_LOG_THROW("invalid list count %lu != %u", tokens.size(), list.count);
+    }
+
+    list.list = sai_alloc_n_of_ptr_type(list.count, list.list);
+
+    for (uint32_t i = 0; i < list.count; ++i)
+    {
+        sai_deserialize_ipv6(tokens[i], list.list[i]);
+    }
+}
+
 template <typename T>
 void sai_deserialize_range(
         _In_ const std::string& s,
@@ -2654,20 +2933,20 @@ void sai_deserialize_acl_field(
             sai_deserialize_number(smask, field.mask.u8, true);
             return;
 
-        case SAI_ATTR_VALUE_TYPE_ACL_FIELD_DATA_INT8:
-            sai_deserialize_number(sfield, field.data.s8);
-            sai_deserialize_number(smask, field.mask.s8, true);
-            return;
+//        case SAI_ATTR_VALUE_TYPE_ACL_FIELD_DATA_INT8:
+//            sai_deserialize_number(sfield, field.data.s8);
+//            sai_deserialize_number(smask, field.mask.s8, true);
+//            return;
 
         case SAI_ATTR_VALUE_TYPE_ACL_FIELD_DATA_UINT16:
             sai_deserialize_number(sfield, field.data.u16);
             sai_deserialize_number(smask, field.mask.u16, true);
             return;
 
-        case SAI_ATTR_VALUE_TYPE_ACL_FIELD_DATA_INT16:
-            sai_deserialize_number(sfield, field.data.s16);
-            sai_deserialize_number(smask, field.mask.s16, true);
-            return;
+//        case SAI_ATTR_VALUE_TYPE_ACL_FIELD_DATA_INT16:
+//            sai_deserialize_number(sfield, field.data.s16);
+//            sai_deserialize_number(smask, field.mask.s16, true);
+//            return;
 
         case SAI_ATTR_VALUE_TYPE_ACL_FIELD_DATA_UINT32:
             sai_deserialize_number(sfield, field.data.u32);
@@ -2704,12 +2983,14 @@ void sai_deserialize_acl_field(
 
         case SAI_ATTR_VALUE_TYPE_ACL_FIELD_DATA_OBJECT_LIST:
             return sai_deserialize_oid_list(sfield, field.data.objlist, countOnly);
-            /*
-               case SAI_ATTR_VALUE_TYPE_ACL_FIELD_DATA_UINT8_LIST:
-               return sai_deserialize_number_list(field.data.u8list, countOnly) + "&mask:" + sai_deserialize_uint8_hex_list(field.mask.u8list, countOnly);
-               */
+
+        case SAI_ATTR_VALUE_TYPE_ACL_FIELD_DATA_UINT8_LIST:
+            sai_deserialize_number_list(sfield, field.data.u8list, countOnly);
+            sai_deserialize_number_list(smask, field.mask.u8list, countOnly, true);
+            return;
+
         default:
-            SWSS_LOG_THROW("FATAIL: invalid serialization type %d", meta.attrvaluetype);
+            SWSS_LOG_THROW("sai attr value %s is not implemented, FIXME", sai_serialize_attr_value_type(meta.attrvaluetype).c_str());
     }
 }
 
@@ -2737,14 +3018,14 @@ void sai_deserialize_acl_action(
         case SAI_ATTR_VALUE_TYPE_ACL_ACTION_DATA_UINT8:
             return sai_deserialize_number(s, action.parameter.u8);
 
-        case SAI_ATTR_VALUE_TYPE_ACL_ACTION_DATA_INT8:
-            return sai_deserialize_number(s, action.parameter.s8);
+//        case SAI_ATTR_VALUE_TYPE_ACL_ACTION_DATA_INT8:
+//            return sai_deserialize_number(s, action.parameter.s8);
 
         case SAI_ATTR_VALUE_TYPE_ACL_ACTION_DATA_UINT16:
             return sai_deserialize_number(s, action.parameter.u16);
 
-        case SAI_ATTR_VALUE_TYPE_ACL_ACTION_DATA_INT16:
-            return sai_deserialize_number(s, action.parameter.s16);
+//        case SAI_ATTR_VALUE_TYPE_ACL_ACTION_DATA_INT16:
+//            return sai_deserialize_number(s, action.parameter.s16);
 
         case SAI_ATTR_VALUE_TYPE_ACL_ACTION_DATA_UINT32:
             return sai_deserialize_number(s, action.parameter.u32);
@@ -2767,8 +3048,12 @@ void sai_deserialize_acl_action(
         case SAI_ATTR_VALUE_TYPE_ACL_ACTION_DATA_OBJECT_LIST:
             return sai_deserialize_oid_list(s, action.parameter.objlist, countOnly);
 
+        case SAI_ATTR_VALUE_TYPE_ACL_ACTION_DATA_IP_ADDRESS:
+            sai_deserialize_ip_address(s, action.parameter.ipaddr);
+            return;
+
         default:
-            SWSS_LOG_THROW("FATAIL: invalid serialization type %d", meta.attrvaluetype);
+            SWSS_LOG_THROW("sai attr value %s is not implemented, FIXME", sai_serialize_attr_value_type(meta.attrvaluetype).c_str());
     }
 }
 
@@ -2896,8 +3181,7 @@ void sai_deserialize_system_port_config_list(
 
     if (arr.size() != (size_t)sysportconfiglist.count)
     {
-        SWSS_LOG_ERROR("system port config list count mismatch %lu vs %u", arr.size(), sysportconfiglist.count);
-        throw std::runtime_error("system port config list count mismatch");
+        SWSS_LOG_THROW("system port config list count mismatch %lu vs %u", arr.size(), sysportconfiglist.count);
     }
 
     sysportconfiglist.list = sai_alloc_n_of_ptr_type(sysportconfiglist.count, sysportconfiglist.list);
@@ -2937,8 +3221,8 @@ void sai_deserialize_attr_value(
         case SAI_ATTR_VALUE_TYPE_UINT16:
             return sai_deserialize_number(s, attr.value.u16);
 
-        case SAI_ATTR_VALUE_TYPE_INT16:
-            return sai_deserialize_number(s, attr.value.s16);
+//        case SAI_ATTR_VALUE_TYPE_INT16:
+//            return sai_deserialize_number(s, attr.value.s16);
 
         case SAI_ATTR_VALUE_TYPE_UINT32:
             return sai_deserialize_number(s, attr.value.u32);
@@ -2949,8 +3233,8 @@ void sai_deserialize_attr_value(
         case SAI_ATTR_VALUE_TYPE_UINT64:
             return sai_deserialize_number(s, attr.value.u64);
 
-        case SAI_ATTR_VALUE_TYPE_INT64:
-            return sai_deserialize_number(s, attr.value.s64);
+//        case SAI_ATTR_VALUE_TYPE_INT64:
+//            return sai_deserialize_number(s, attr.value.s64);
 
         case SAI_ATTR_VALUE_TYPE_MAC:
             return sai_deserialize_mac(s, attr.value.mac);
@@ -2982,11 +3266,11 @@ void sai_deserialize_attr_value(
         case SAI_ATTR_VALUE_TYPE_INT8_LIST:
             return sai_deserialize_number_list(s, attr.value.s8list, countOnly);
 
-        case SAI_ATTR_VALUE_TYPE_UINT16_LIST:
-            return sai_deserialize_number_list(s, attr.value.u16list, countOnly);
-
-        case SAI_ATTR_VALUE_TYPE_INT16_LIST:
-            return sai_deserialize_number_list(s, attr.value.s16list, countOnly);
+//        case SAI_ATTR_VALUE_TYPE_UINT16_LIST:
+//            return sai_deserialize_number_list(s, attr.value.u16list, countOnly);
+//
+//        case SAI_ATTR_VALUE_TYPE_INT16_LIST:
+//            return sai_deserialize_number_list(s, attr.value.s16list, countOnly);
 
         case SAI_ATTR_VALUE_TYPE_UINT32_LIST:
             return sai_deserialize_number_list(s, attr.value.u32list, countOnly);
@@ -2997,8 +3281,8 @@ void sai_deserialize_attr_value(
         case SAI_ATTR_VALUE_TYPE_UINT32_RANGE:
             return sai_deserialize_range(s, attr.value.u32range);
 
-        case SAI_ATTR_VALUE_TYPE_INT32_RANGE:
-            return sai_deserialize_range(s, attr.value.s32range);
+//        case SAI_ATTR_VALUE_TYPE_INT32_RANGE:
+//            return sai_deserialize_range(s, attr.value.s32range);
 
         case SAI_ATTR_VALUE_TYPE_VLAN_LIST:
             return sai_deserialize_number_list(s, attr.value.vlanlist, countOnly);
@@ -3006,11 +3290,17 @@ void sai_deserialize_attr_value(
         case SAI_ATTR_VALUE_TYPE_QOS_MAP_LIST:
             return sai_deserialize_qos_map_list(s, attr.value.qosmap, countOnly);
 
+        case SAI_ATTR_VALUE_TYPE_MAP_LIST:
+            return sai_deserialize_map_list(s, attr.value.maplist, countOnly);
+
         case SAI_ATTR_VALUE_TYPE_ACL_RESOURCE_LIST:
             return sai_deserialize_acl_resource_list(s, attr.value.aclresource, countOnly);
 
         case SAI_ATTR_VALUE_TYPE_IP_ADDRESS_LIST:
             return sai_deserialize_ip_address_list(s, attr.value.ipaddrlist, countOnly);
+
+        case SAI_ATTR_VALUE_TYPE_SEGMENT_LIST:
+            return sai_deserialize_segment_list(s, attr.value.segmentlist, countOnly);
 
             // ACL FIELD DATA
 
@@ -3044,10 +3334,17 @@ void sai_deserialize_attr_value(
         case SAI_ATTR_VALUE_TYPE_ACL_ACTION_DATA_IPV6:
         case SAI_ATTR_VALUE_TYPE_ACL_ACTION_DATA_OBJECT_ID:
         case SAI_ATTR_VALUE_TYPE_ACL_ACTION_DATA_OBJECT_LIST:
+        case SAI_ATTR_VALUE_TYPE_ACL_ACTION_DATA_IP_ADDRESS:
             return sai_deserialize_acl_action(s, meta, attr.value.aclaction, countOnly);
 
         case SAI_ATTR_VALUE_TYPE_ACL_CAPABILITY:
             return sai_deserialize_acl_capability(s, attr.value.aclcapability);
+
+        case SAI_ATTR_VALUE_TYPE_AUTH_KEY:
+            return sai_deserialize_hex_binary(s, attr.value.authkey);
+
+        case SAI_ATTR_VALUE_TYPE_ENCRYPT_KEY:
+            return sai_deserialize_hex_binary(s, attr.value.encrypt_key);
 
         case SAI_ATTR_VALUE_TYPE_MACSEC_SAK:
             return sai_deserialize_hex_binary(s, attr.value.macsecsak);
@@ -3094,6 +3391,24 @@ void sai_deserialize_queue_deadlock(
     SWSS_LOG_ENTER();
 
     sai_deserialize_enum(s, &sai_metadata_enum_sai_queue_pfc_deadlock_event_type_t, (int32_t&)event);
+}
+
+void sai_deserialize_ipmc_entry_type(
+        _In_ const std::string& s,
+        _Out_ sai_ipmc_entry_type_t& type)
+{
+    SWSS_LOG_ENTER();
+
+    return sai_deserialize_enum(s, &sai_metadata_enum_sai_ipmc_entry_type_t, (int32_t&)type);
+}
+
+void sai_deserialize_l2mc_entry_type(
+        _In_ const std::string& s,
+        _Out_ sai_l2mc_entry_type_t& type)
+{
+    SWSS_LOG_ENTER();
+
+    return sai_deserialize_enum(s, &sai_metadata_enum_sai_l2mc_entry_type_t, (int32_t&)type);
 }
 
 void sai_deserialize_fdb_event(
@@ -3285,6 +3600,23 @@ void sai_deserialize_inseg_entry(
     sai_deserialize_number(j["label"], inseg_entry.label);
 }
 
+void sai_deserialize_my_sid_entry(
+        _In_ const std::string& s,
+        _Out_ sai_my_sid_entry_t &ne)
+{
+    SWSS_LOG_ENTER();
+
+    json j = json::parse(s);
+
+    sai_deserialize_object_id(j["switch_id"], ne.switch_id);
+    sai_deserialize_object_id(j["vr_id"], ne.vr_id);
+    sai_deserialize_number(j["locator_block_len"], ne.locator_block_len);
+    sai_deserialize_number(j["locator_node_len"], ne.locator_node_len);
+    sai_deserialize_number(j["function_len"], ne.function_len);
+    sai_deserialize_number(j["args_len"], ne.args_len);
+    sai_deserialize_ipv6(j["sid"], ne.sid);
+}
+
 static void sai_deserialize_nat_entry_key(
         _In_ const json& j,
         _Out_ sai_nat_entry_key_t& nat_entry_key)
@@ -3344,6 +3676,49 @@ void sai_deserialize_nat_entry(
     sai_deserialize_nat_entry_data(j["nat_data"], nat_entry.data);
 }
 
+void sai_deserialize_ipmc_entry(
+        _In_ const std::string &s,
+        _Out_ sai_ipmc_entry_t& ipmc_entry)
+{
+    SWSS_LOG_ENTER();
+
+    json j = json::parse(s);
+
+    sai_deserialize_object_id(j["switch_id"], ipmc_entry.switch_id);
+    sai_deserialize_object_id(j["vr_id"], ipmc_entry.vr_id);
+    sai_deserialize_ipmc_entry_type(j["type"], ipmc_entry.type);
+    sai_deserialize_ip_address(j["destination"], ipmc_entry.destination);
+    sai_deserialize_ip_address(j["source"], ipmc_entry.source);
+}
+
+void sai_deserialize_l2mc_entry(
+        _In_ const std::string &s,
+        _Out_ sai_l2mc_entry_t& l2mc_entry)
+{
+    SWSS_LOG_ENTER();
+
+    json j = json::parse(s);
+
+    sai_deserialize_object_id(j["switch_id"], l2mc_entry.switch_id);
+    sai_deserialize_object_id(j["bv_id"], l2mc_entry.bv_id);
+    sai_deserialize_l2mc_entry_type(j["type"], l2mc_entry.type);
+    sai_deserialize_ip_address(j["destination"], l2mc_entry.destination);
+    sai_deserialize_ip_address(j["source"], l2mc_entry.source);
+}
+
+void sai_deserialize_mcast_fdb_entry(
+        _In_ const std::string &s,
+        _Out_ sai_mcast_fdb_entry_t& mcast_fdb_entry)
+{
+    SWSS_LOG_ENTER();
+
+    json j = json::parse(s);
+
+    sai_deserialize_object_id(j["switch_id"], mcast_fdb_entry.switch_id);
+    sai_deserialize_object_id(j["bv_id"], mcast_fdb_entry.bv_id);
+    sai_deserialize_mac(j["mac_address"], mcast_fdb_entry.mac_address);
+}
+
 void sai_deserialize_attr_id(
         _In_ const std::string& s,
         _Out_ const sai_attr_metadata_t** meta)
@@ -3397,7 +3772,7 @@ void sai_deserialize_object_meta_key(
 
     sai_deserialize_object_type(str_object_type, meta_key.objecttype);
 
-    if (meta_key.objecttype == SAI_OBJECT_TYPE_NULL || meta_key.objecttype >= SAI_OBJECT_TYPE_EXTENSIONS_MAX)
+    if (!sai_metadata_is_object_type_valid(meta_key.objecttype))
     {
         SWSS_LOG_THROW("invalid object type value %s", sai_serialize_object_type(meta_key.objecttype).c_str());
     }
@@ -3424,6 +3799,22 @@ void sai_deserialize_object_meta_key(
 
         case SAI_OBJECT_TYPE_INSEG_ENTRY:
             sai_deserialize_inseg_entry(str_object_id, meta_key.objectkey.key.inseg_entry);
+            break;
+
+        case SAI_OBJECT_TYPE_MY_SID_ENTRY:
+            sai_deserialize_my_sid_entry(str_object_id, meta_key.objectkey.key.my_sid_entry);
+            break;
+
+        case SAI_OBJECT_TYPE_L2MC_ENTRY:
+            sai_deserialize_l2mc_entry(str_object_id, meta_key.objectkey.key.l2mc_entry);
+            break;
+
+        case SAI_OBJECT_TYPE_IPMC_ENTRY:
+            sai_deserialize_ipmc_entry(str_object_id, meta_key.objectkey.key.ipmc_entry);
+            break;
+
+        case SAI_OBJECT_TYPE_MCAST_FDB_ENTRY:
+            sai_deserialize_mcast_fdb_entry(str_object_id, meta_key.objectkey.key.mcast_fdb_entry);
             break;
 
         default:
@@ -3600,13 +3991,13 @@ void sai_deserialize_free_attribute_value(
             sai_free_list(attr.value.s8list);
             break;
 
-        case SAI_ATTR_VALUE_TYPE_UINT16_LIST:
-            sai_free_list(attr.value.u16list);
-            break;
-
-        case SAI_ATTR_VALUE_TYPE_INT16_LIST:
-            sai_free_list(attr.value.s16list);
-            break;
+//        case SAI_ATTR_VALUE_TYPE_UINT16_LIST:
+//            sai_free_list(attr.value.u16list);
+//            break;
+//
+//        case SAI_ATTR_VALUE_TYPE_INT16_LIST:
+//            sai_free_list(attr.value.s16list);
+//            break;
 
         case SAI_ATTR_VALUE_TYPE_UINT32_LIST:
             sai_free_list(attr.value.u32list);
@@ -3628,12 +4019,20 @@ void sai_deserialize_free_attribute_value(
             sai_free_list(attr.value.qosmap);
             break;
 
+        case SAI_ATTR_VALUE_TYPE_MAP_LIST:
+            sai_free_list(attr.value.maplist);
+            break;
+
         case SAI_ATTR_VALUE_TYPE_ACL_RESOURCE_LIST:
             sai_free_list(attr.value.aclresource);
             break;
 
         case SAI_ATTR_VALUE_TYPE_IP_ADDRESS_LIST:
             sai_free_list(attr.value.ipaddrlist);
+            break;
+
+        case SAI_ATTR_VALUE_TYPE_SEGMENT_LIST:
+            sai_free_list(attr.value.segmentlist);
             break;
 
             /* ACL FIELD DATA */
@@ -3673,6 +4072,7 @@ void sai_deserialize_free_attribute_value(
         case SAI_ATTR_VALUE_TYPE_ACL_ACTION_DATA_IPV4:
         case SAI_ATTR_VALUE_TYPE_ACL_ACTION_DATA_IPV6:
         case SAI_ATTR_VALUE_TYPE_ACL_ACTION_DATA_OBJECT_ID:
+        case SAI_ATTR_VALUE_TYPE_ACL_ACTION_DATA_IP_ADDRESS:
             break;
 
         case SAI_ATTR_VALUE_TYPE_ACL_ACTION_DATA_OBJECT_LIST:
@@ -3681,6 +4081,12 @@ void sai_deserialize_free_attribute_value(
 
         case SAI_ATTR_VALUE_TYPE_ACL_CAPABILITY:
             sai_free_list(attr.value.aclcapability.action_list);
+            break;
+
+        case SAI_ATTR_VALUE_TYPE_AUTH_KEY:
+            break;
+
+        case SAI_ATTR_VALUE_TYPE_ENCRYPT_KEY:
             break;
 
         case SAI_ATTR_VALUE_TYPE_MACSEC_SAK:
@@ -3698,7 +4104,7 @@ void sai_deserialize_free_attribute_value(
             break;
 
         default:
-            SWSS_LOG_THROW("unsupported type %d on deserialize free, FIXME", type);
+            SWSS_LOG_THROW("sai attr value %s is not implemented, FIXME", sai_serialize_attr_value_type(type).c_str());
     }
 }
 
@@ -3825,9 +4231,7 @@ void sai_deserialize(
     }
     else
     {
-        SWSS_LOG_WARN("enum %s not found in sai_redis_notify_syncd_t", s.c_str());
-
-        sai_deserialize_number(s, value);
+        SWSS_LOG_THROW("enum %s not found in sai_redis_notify_syncd_t", s.c_str());
     }
 }
 

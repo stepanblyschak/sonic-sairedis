@@ -105,6 +105,11 @@ namespace saimeta
                     _In_ const sai_stat_id_t *counter_ids,
                     _Out_ uint64_t *counters) override;
 
+            virtual sai_status_t queryStatsCapability(
+                    _In_ sai_object_id_t switch_id,
+                    _In_ sai_object_type_t object_type,
+                    _Inout_ sai_stat_capability_list_t *stats_capability) override;
+
             virtual sai_status_t getStatsExt(
                     _In_ sai_object_type_t object_type,
                     _In_ sai_object_id_t object_id,
@@ -161,7 +166,9 @@ namespace saimeta
 
             void meta_init_db();
 
-            bool isEmpty();
+            bool isEmpty() const;
+
+            void dump() const;
 
         public: // notifications
 
@@ -186,7 +193,7 @@ namespace saimeta
 
             void meta_sai_on_bfd_session_state_change(
                     _In_ uint32_t count,
-                    _In_ const sai_bfd_session_state_notification_t *data);        
+                    _In_ const sai_bfd_session_state_notification_t *data);
 
         private: // notifications helpers
 
@@ -382,7 +389,7 @@ namespace saimeta
                     _In_ const uint32_t attr_count,
                     _In_ sai_attribute_t *attr_list);
 
-        private: // stats
+        protected: // stats
 
             sai_status_t meta_validate_stats(
                     _In_ sai_object_type_t object_type,
@@ -391,6 +398,10 @@ namespace saimeta
                     _In_ const sai_stat_id_t *counter_ids,
                     _Out_ uint64_t *counters,
                     _In_ sai_stats_mode_t mode);
+
+            sai_status_t meta_validate_query_stats_capability(
+                    _In_ sai_object_type_t object_type,
+                    _In_ sai_object_id_t object_id);
 
         private: // validate OID
 
@@ -434,6 +445,10 @@ namespace saimeta
 
             sai_status_t meta_sai_validate_inseg_entry(
                     _In_ const sai_inseg_entry_t* inseg_entry,
+                    _In_ bool create);
+
+            sai_status_t meta_sai_validate_my_sid_entry(
+                    _In_ const sai_my_sid_entry_t* my_sid_entry,
                     _In_ bool create);
 
         public:

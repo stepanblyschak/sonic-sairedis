@@ -14,12 +14,14 @@ extern "C" {
     _X(NEIGHBOR_ENTRY,neighbor_entry);      \
     _X(ROUTE_ENTRY,route_entry);            \
     _X(NAT_ENTRY,nat_entry);                \
+    _X(MY_SID_ENTRY,my_sid_entry);          \
 
 #define SAIREDIS_DECLARE_EVERY_BULK_ENTRY(_X)   \
     _X(FDB_ENTRY,fdb_entry);                    \
     _X(INSEG_ENTRY,inseg_entry);                \
     _X(NAT_ENTRY,nat_entry);                    \
     _X(ROUTE_ENTRY,route_entry);                \
+    _X(MY_SID_ENTRY,my_sid_entry);              \
 
 #define SAIREDIS_SAIINTERFACE_DECLARE_QUAD_ENTRY_VIRTUAL(OT,ot)     \
     virtual sai_status_t create(                                    \
@@ -193,6 +195,11 @@ namespace sairedis
                     _In_ uint32_t number_of_counters,
                     _In_ const sai_stat_id_t *counter_ids,
                     _Out_ uint64_t *counters) = 0;
+
+            virtual sai_status_t queryStatsCapability(
+                    _In_ sai_object_id_t switch_id,
+                    _In_ sai_object_type_t object_type,
+                    _Inout_ sai_stat_capability_list_t *stats_capability) = 0;
 
             virtual sai_status_t getStatsExt(
                     _In_ sai_object_type_t object_type,
