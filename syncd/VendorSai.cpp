@@ -4,6 +4,7 @@
 
 #include "swss/logger.h"
 
+#include <cinttypes>
 #include <cstring>
 
 using namespace syncd;
