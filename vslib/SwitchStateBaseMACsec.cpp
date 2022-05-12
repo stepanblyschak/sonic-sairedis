@@ -11,6 +11,7 @@
 #include <regex>
 
 #include <net/if.h>
+#include <arpa/inet.h>
 #include <byteswap.h>
 
 using namespace saivs;
@@ -135,6 +136,30 @@ sai_status_t SwitchStateBase::setAclEntryMACsecFlowActive(
     }
 
     return SAI_STATUS_SUCCESS;
+}
+
+sai_status_t SwitchStateBase::setMACsecSA(
+        _In_ sai_object_id_t macsec_sa_id,
+        _In_ const sai_attribute_t* attr)
+{
+    SWSS_LOG_ENTER();
+
+    MACsecAttr macsecAttr;
+
+    CHECK_STATUS(loadMACsecAttr(SAI_OBJECT_TYPE_MACSEC_SA, macsec_sa_id, macsecAttr));
+
+    if (attr->id == SAI_MACSEC_SA_ATTR_MINIMUM_INGRESS_XPN || attr->id == SAI_MACSEC_SA_ATTR_CONFIGURED_EGRESS_XPN)
+    {
+        if (!m_macsecManager.update_macsec_sa_pn(macsecAttr, attr->value.u64))
+        {
+            SWSS_LOG_WARN("Fail to update PN (%" PRIu64 ") of MACsec SA %s", attr->value.u64, sai_serialize_object_id(macsec_sa_id).c_str());
+
+            return SAI_STATUS_FAILURE;
+        }
+    }
+
+    auto sid = sai_serialize_object_id(macsec_sa_id);
+    return set_internal(SAI_OBJECT_TYPE_MACSEC_SA, sid, attr);
 }
 
 sai_status_t SwitchStateBase::createMACsecPort(
@@ -589,11 +614,12 @@ sai_status_t SwitchStateBase::loadMACsecAttrFromMACsecSA(
     SAI_METADATA_GET_ATTR_BY_ID(attr, SAI_MACSEC_SA_ATTR_SC_ID, attrCount, attrList);
 
     // Find MACsec SC attributes
-    std::vector<sai_attribute_t> attrs(4);
+    std::vector<sai_attribute_t> attrs(5);
     attrs[0].id = SAI_MACSEC_SC_ATTR_FLOW_ID;
     attrs[1].id = SAI_MACSEC_SC_ATTR_MACSEC_SCI;
     attrs[2].id = SAI_MACSEC_SC_ATTR_ENCRYPTION_ENABLE;
     attrs[3].id = SAI_MACSEC_SC_ATTR_MACSEC_CIPHER_SUITE;
+    attrs[4].id = SAI_MACSEC_SC_ATTR_MACSEC_EXPLICIT_SCI_ENABLE;
 
     CHECK_STATUS(get(SAI_OBJECT_TYPE_MACSEC_SC, attr->value.oid, static_cast<uint32_t>(attrs.size()), attrs.data()));
 
@@ -609,6 +635,7 @@ sai_status_t SwitchStateBase::loadMACsecAttrFromMACsecSA(
     std::stringstream sciHexStr;
     macsecAttr.m_encryptionEnable = attrs[2].value.booldata;
     bool is_sak_128_bit = (attrs[3].value.s32 == SAI_MACSEC_CIPHER_SUITE_GCM_AES_128 || attrs[3].value.s32 == SAI_MACSEC_CIPHER_SUITE_GCM_AES_XPN_128);
+    macsecAttr.m_sendSci = attrs[4].value.booldata;
 
     sciHexStr << std::setw(MACSEC_SCI_LENGTH) << std::setfill('0');
 
@@ -679,7 +706,9 @@ sai_status_t SwitchStateBase::loadMACsecAttrFromMACsecSA(
     {
         SAI_METADATA_GET_ATTR_BY_ID(attr, SAI_MACSEC_SA_ATTR_MACSEC_SSCI, attrCount, attrList);
 
-        macsecAttr.m_ssci = attr->value.u32;
+        // The Linux kernel directly uses ssci to XOR with the salt that is network order,
+        // So, this conversion is useful to convert SSCI from the host order to network order.
+        macsecAttr.m_ssci = htonl(attr->value.u32);
 
         SAI_METADATA_GET_ATTR_BY_ID(attr, SAI_MACSEC_SA_ATTR_SALT, attrCount, attrList);
 

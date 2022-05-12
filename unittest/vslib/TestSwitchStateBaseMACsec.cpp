@@ -30,6 +30,8 @@ TEST(SwitchStateBase, loadMACsecAttrFromMACsecSA)
     attr.id = SAI_MACSEC_SC_ATTR_MACSEC_CIPHER_SUITE;
     attr.value.s32 = sai_macsec_cipher_suite_t::SAI_MACSEC_CIPHER_SUITE_GCM_AES_128;
     attrs.push_back(attr);
+    attr.id = SAI_MACSEC_SC_ATTR_MACSEC_EXPLICIT_SCI_ENABLE;
+    attrs.push_back(attr);
     EXPECT_EQ(
         SAI_STATUS_SUCCESS,
         ss.create_internal(
@@ -108,3 +110,19 @@ TEST(SwitchStateBase, removeMACsecPort)
     EXPECT_EQ(1, ss.m_macsecFlowPortMap.size());
     EXPECT_EQ(1, ss.m_uncreatedIngressMACsecSAs.size());
 }
+
+TEST(SwitchStateBase, setMACsecSA)
+{
+    // Due to this function highly depends on system environment which cannot be tested directly,
+    // Just create this Test block for passing coverage
+    auto sc = std::make_shared<SwitchConfig>(0, "");
+    auto scc = std::make_shared<SwitchConfigContainer>();
+
+    SwitchStateBase ss(
+            0x2100000000,
+            std::make_shared<RealObjectIdManager>(0, scc),
+            sc);
+
+    ss.setMACsecSA(0, nullptr);
+}
+
