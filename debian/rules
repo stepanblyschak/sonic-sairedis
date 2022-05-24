@@ -5,7 +5,7 @@
 
 .ONESHELL:
 SHELL = /bin/bash
-.SHELLFLAGS += -x
+.SHELLFLAGS += -ex
 
 # see EXAMPLES in dpkg-buildflags(1) and read /usr/share/dpkg/*
 DPKG_EXPORT_BUILDFLAGS = 1
