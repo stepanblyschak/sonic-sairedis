@@ -29,6 +29,16 @@ endif
 # package maintainers to append LDFLAGS
 #export DEB_LDFLAGS_MAINT_APPEND = -Wl,--as-needed
 
+DOPACKAGES = $(shell dh_listpackages)
+
+# For Debian jessie, stretch, and buster, and Ubuntu bionic and focal, build
+# Python 2 bindings. This is controlled by the build profile being used.
+ifneq (,$(filter python-pysairedis,$(DOPACKAGES)))
+configure_opts += --enable-python2
+else
+configure_opts += --disable-python2
+endif
+
 clean:
 	dh $@ --with autotools-dev
 
