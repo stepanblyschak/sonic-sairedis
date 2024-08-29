@@ -564,6 +564,71 @@ void Recorder::recordBulkGenericSet(
     recordLine("S|" + key + joined);
 }
 
+void Recorder::recordBulkGenericGet(
+        _In_ const std::string& key,
+        _In_ const std::vector<swss::FieldValueTuple>& arguments)
+{
+    SWSS_LOG_ENTER();
+
+    std::string joined;
+
+    for (const auto &e: arguments)
+    {
+        // ||obj_id|attr=val|status||obj_id|attr=val|status
+
+        joined += "||" + fvField(e) + "|" + fvValue(e);
+    }
+
+    // TODO (stepanb): Need implement SaiPlayer for new bulk.
+
+    // capital 'B' stands for Bulk GET operation. Note: 'G' already used for get response.
+
+    recordLine("B|" + key + joined);
+}
+
+void Recorder::recordBulkGenericGetResponse(
+        _In_ sai_status_t status,
+        _In_ sai_object_type_t objectType,
+        _In_ uint32_t objectCount,
+        _In_ const uint32_t* attr_count,
+        _In_ sai_attribute_t **attr_list,
+        _In_ const sai_status_t *objectStatuses)
+{
+    SWSS_LOG_ENTER();
+
+    std::string joined;
+
+    for (size_t idx = 0; idx < objectCount; idx++)
+    {
+        std::vector<swss::FieldValueTuple> entry;
+
+        if (objectStatuses[idx] == SAI_STATUS_SUCCESS ||
+            objectStatuses[idx] == SAI_STATUS_BUFFER_OVERFLOW)
+        {
+            // will only record COUNT values for lists, since count is expected
+            // values, and user buffer is not enough to return all from SAI
+            const bool countOnly = (status == SAI_STATUS_BUFFER_OVERFLOW);
+
+            entry = SaiAttributeList::serialize_attr_list(
+                objectType,
+                attr_count[idx],
+                attr_list[idx],
+                countOnly);
+        }
+
+        joined += "||" + sai_serialize_status(objectStatuses[idx]);
+
+        for (const auto &e: entry)
+        {
+            // ||attr=val||attr=val|
+
+            joined += "|" + fvField(e) + "=" + fvValue(e);
+        }
+    }
+
+    recordLine("G|" + sai_serialize_status(status) + "||" + joined);
+}
+
 void Recorder::recordBulkGenericSetResponse(
         _In_ sai_status_t status,
         _In_ uint32_t objectCount,

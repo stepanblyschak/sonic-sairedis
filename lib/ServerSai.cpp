@@ -434,6 +434,29 @@ sai_status_t ServerSai::bulkSet(
             object_statuses);
 }
 
+sai_status_t ServerSai::bulkGet(
+        _In_ sai_object_type_t object_type,
+        _In_ uint32_t object_count,
+        _In_ const sai_object_id_t *object_id,
+        _In_ const uint32_t *attr_count,
+        _Inout_ sai_attribute_t **attr_list,
+        _In_ sai_bulk_op_error_mode_t mode,
+        _Out_ sai_status_t *object_statuses)
+{
+    MUTEX();
+    SWSS_LOG_ENTER();
+    REDIS_CHECK_API_INITIALIZED();
+
+    return m_sai->bulkGet(
+            object_type,
+            object_count,
+            object_id,
+            attr_count,
+            attr_list,
+            mode,
+            object_statuses);
+}
+
 // BULK QUAD ENTRY
 
 #define DECLARE_BULK_CREATE_ENTRY(OT,ot)                    \

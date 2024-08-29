@@ -325,18 +325,24 @@ PRIVATE extern std::shared_ptr<sairedis::SaiInterface>      vs_sai;
             object_statuses);                          \
 }
 
-#define VS_BULK_GET(OT,fname)                       \
-    static sai_status_t vs_bulk_get_ ## fname(      \
-            _In_ uint32_t object_count,             \
-            _In_ const sai_object_id_t *object_id,  \
-            _In_ const uint32_t *attr_count,        \
-            _Inout_ sai_attribute_t **attr_list,    \
-            _In_ sai_bulk_op_error_mode_t mode,     \
-            _Out_ sai_status_t *object_statuses)    \
-{                                                   \
-    SWSS_LOG_ENTER();                               \
-    SWSS_LOG_ERROR("not implemented");              \
-    return SAI_STATUS_NOT_IMPLEMENTED;              \
+#define VS_BULK_GET(OT,fname)                          \
+    static sai_status_t vs_bulk_get_ ## fname(         \
+            _In_ uint32_t object_count,                \
+            _In_ const sai_object_id_t *object_id,     \
+            _In_ const uint32_t *attr_count,           \
+            _Inout_ sai_attribute_t **attr_list,       \
+            _In_ sai_bulk_op_error_mode_t mode,        \
+            _Out_ sai_status_t *object_statuses)       \
+{                                                      \
+    SWSS_LOG_ENTER();                                  \
+    return vs_sai->bulkGet(                            \
+            (sai_object_type_t)SAI_OBJECT_TYPE_ ## OT, \
+            object_count,                              \
+            object_id,                                 \
+            attr_count,                                \
+            attr_list,                                 \
+            mode,                                      \
+            object_statuses);                          \
 }
 
 // BULK QUAD DECLARE

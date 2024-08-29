@@ -1337,6 +1337,21 @@ sai_status_t ClientSai::bulkSet(
     return waitForBulkResponse(SAI_COMMON_API_BULK_SET, (uint32_t)serialized_object_ids.size(), object_statuses);
 }
 
+__attribute__((noreturn))
+sai_status_t ClientSai::bulkGet(
+        _In_ sai_object_type_t object_type,
+        _In_ uint32_t object_count,
+        _In_ const sai_object_id_t *object_id,
+        _In_ const uint32_t *attr_count,
+        _Inout_ sai_attribute_t **attr_list,
+        _In_ sai_bulk_op_error_mode_t mode,
+        _Out_ sai_status_t *object_statuses)
+{
+    SWSS_LOG_ENTER();
+
+    SWSS_LOG_THROW("Not implemented");
+}
+
 // BULK RESPONSE HELPERS
 
 sai_status_t ClientSai::waitForBulkResponse(

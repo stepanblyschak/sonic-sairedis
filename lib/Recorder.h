@@ -302,6 +302,18 @@ namespace sairedis
                     _In_ uint32_t objectCount,
                     _In_ const sai_status_t *objectStatuses);
 
+            void recordBulkGenericGet(
+                    _In_ const std::string& key,
+                    _In_ const std::vector<swss::FieldValueTuple>& arguments);
+
+            void recordBulkGenericGetResponse(
+                    _In_ sai_status_t status,
+                    _In_ sai_object_type_t objectType,
+                    _In_ uint32_t objectCount,
+                    _In_ const uint32_t* attr_count,
+                    _In_ sai_attribute_t **attr_list,
+                    _In_ const sai_status_t *objectStatuses);
+
         public: // SAI query interface API
 
             void recordFlushFdbEntries(
