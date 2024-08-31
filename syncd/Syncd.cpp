@@ -2189,50 +2189,54 @@ sai_status_t Syncd::processBulkOid(
 
     all = SAI_STATUS_SUCCESS;
 
-    for (size_t idx = 0; idx < objectIds.size(); ++idx)
     {
-        sai_status_t status = SAI_STATUS_FAILURE;
+        SWSS_LOG_TIMER("Bulk operation (fallback) %s", sai_serialize_object_type(objectType).c_str());
 
-        auto& list = attributes[idx];
+        for (size_t idx = 0; idx < objectIds.size(); ++idx)
+        {
+            sai_status_t status = SAI_STATUS_FAILURE;
 
-        sai_attribute_t *attr_list = list->get_attr_list();
-        uint32_t attr_count = list->get_attr_count();
+            auto& list = attributes[idx];
 
-        if (api == SAI_COMMON_API_BULK_CREATE)
-        {
-            status = processOid(objectType, objectIds[idx], SAI_COMMON_API_CREATE, attr_count, attr_list);
-        }
-        else if (api == SAI_COMMON_API_BULK_REMOVE)
-        {
-            status = processOid(objectType, objectIds[idx], SAI_COMMON_API_REMOVE, attr_count, attr_list);
-        }
-        else if (api == SAI_COMMON_API_BULK_SET)
-        {
-            status = processOid(objectType, objectIds[idx], SAI_COMMON_API_SET, attr_count, attr_list);
-        }
-        else if (api == SAI_COMMON_API_BULK_GET)
-        {
-            status = processOid(objectType, objectIds[idx], SAI_COMMON_API_GET, attr_count, attr_list);
-        }
-        else
-        {
-            SWSS_LOG_THROW("api %s is not supported in bulk mode",
-                    sai_serialize_common_api(api).c_str());
-        }
+            sai_attribute_t *attr_list = list->get_attr_list();
+            uint32_t attr_count = list->get_attr_count();
 
-        if (status != SAI_STATUS_SUCCESS)
-        {
-            if (!m_enableSyncMode)
+            if (api == SAI_COMMON_API_BULK_CREATE)
             {
-                SWSS_LOG_THROW("operation %s for %s failed in async mode!",
-                        sai_serialize_common_api(api).c_str(),
-                        sai_serialize_object_type(objectType).c_str());
+                status = processOid(objectType, objectIds[idx], SAI_COMMON_API_CREATE, attr_count, attr_list);
+            }
+            else if (api == SAI_COMMON_API_BULK_REMOVE)
+            {
+                status = processOid(objectType, objectIds[idx], SAI_COMMON_API_REMOVE, attr_count, attr_list);
+            }
+            else if (api == SAI_COMMON_API_BULK_SET)
+            {
+                status = processOid(objectType, objectIds[idx], SAI_COMMON_API_SET, attr_count, attr_list);
+            }
+            else if (api == SAI_COMMON_API_BULK_GET)
+            {
+                status = processOid(objectType, objectIds[idx], SAI_COMMON_API_GET, attr_count, attr_list);
+            }
+            else
+            {
+                SWSS_LOG_THROW("api %s is not supported in bulk mode",
+                        sai_serialize_common_api(api).c_str());
             }
 
-            all = SAI_STATUS_FAILURE; // all can be success if all has been success
-        }
+            if (status != SAI_STATUS_SUCCESS)
+            {
+                if (!m_enableSyncMode)
+                {
+                    SWSS_LOG_THROW("operation %s for %s failed in async mode!",
+                            sai_serialize_common_api(api).c_str(),
+                            sai_serialize_object_type(objectType).c_str());
+                }
 
-        statuses[idx] = status;
+                all = SAI_STATUS_FAILURE; // all can be success if all has been success
+            }
+
+            statuses[idx] = status;
+        }
     }
 
     sai_object_id_t firstObjectId = SAI_NULL_OBJECT_ID;
