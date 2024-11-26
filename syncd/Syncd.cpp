@@ -109,7 +109,7 @@ Syncd::Syncd(
         m_enableSyncMode = true;
     }
 
-    m_manager = std::make_shared<FlexCounterManager>(m_vendorSai, m_contextConfig->m_dbCounters);
+    m_manager = std::make_shared<FlexCounterManager>(m_vendorSai, m_contextConfig->m_dbCounters, m_commandLineOptions->m_supportingBulkCounterGroups);
 
     loadProfileMap();
 
@@ -205,6 +205,21 @@ Syncd::Syncd(
 
         abort();
     }
+
+    sai_api_version_t apiVersion = SAI_VERSION(0,0,0); // invalid version
+
+    status = m_vendorSai->queryApiVersion(&apiVersion);
+
+    if (status != SAI_STATUS_SUCCESS)
+    {
+        SWSS_LOG_WARN("failed to obtain libsai api version: %s", sai_serialize_status(status).c_str());
+    }
+    else
+    {
+        SWSS_LOG_NOTICE("libsai api version: %lu", apiVersion);
+    }
+
+    m_handler->setApiVersion(apiVersion);
 
     m_breakConfig = BreakConfigParser::parseBreakConfig(m_commandLineOptions->m_breakConfig);
 
@@ -1239,7 +1254,7 @@ sai_status_t Syncd::processBulkCreateEntry(
                 sai_deserialize_outbound_routing_entry(objectIds[it], entries[it]);
 
                 entries[it].switch_id = m_translator->translateVidToRid(entries[it].switch_id);
-                entries[it].eni_id = m_translator->translateVidToRid(entries[it].eni_id);
+                entries[it].outbound_routing_group_id = m_translator->translateVidToRid(entries[it].outbound_routing_group_id);
             }
 
             status = m_vendorSai->bulkCreate(
@@ -1525,7 +1540,7 @@ sai_status_t Syncd::processBulkRemoveEntry(
                 sai_deserialize_outbound_routing_entry(objectIds[it], entries[it]);
 
                 entries[it].switch_id = m_translator->translateVidToRid(entries[it].switch_id);
-                entries[it].eni_id = m_translator->translateVidToRid(entries[it].eni_id);
+                entries[it].outbound_routing_group_id = m_translator->translateVidToRid(entries[it].outbound_routing_group_id);
             }
 
             status = m_vendorSai->bulkRemove(
@@ -3121,7 +3136,7 @@ sai_status_t Syncd::processOidCreate(
              * constructor, like getting all queues, ports, etc.
              */
 
-            m_switches[switchVid] = std::make_shared<SaiSwitch>(switchVid, objectRid, m_client, m_translator, m_vendorSai);
+            m_switches[switchVid] = std::make_shared<SaiSwitch>(switchVid, objectRid, m_client, m_translator, m_vendorSai, false, m_commandLineOptions->m_enableAttrVersionCheck);
 
             m_mdioIpcServer->setSwitchId(objectRid);
 
@@ -3707,6 +3722,12 @@ void Syncd::inspectAsic()
             continue;
         }
 
+        SaiAttributeList redis_list(metaKey.objecttype, values, false);
+
+        sai_attribute_t *redis_attr_list = redis_list.get_attr_list();
+
+        m_translator->translateVidToRid(metaKey.objecttype, attr_count, redis_attr_list);
+
         // compare fields and values from ASIC_DB and SAI response and log the difference
 
         for (uint32_t index = 0; index < attr_count; ++index)
@@ -3725,7 +3746,7 @@ void Syncd::inspectAsic()
 
             std::string strSaiAttrValue = sai_serialize_attr_value(*meta, attr, false);
 
-            std::string strRedisAttrValue = hash[meta->attridname];
+            std::string strRedisAttrValue = sai_serialize_attr_value(*meta, redis_attr_list[index], false);
 
             if (strRedisAttrValue == strSaiAttrValue)
             {
@@ -3819,9 +3840,15 @@ sai_status_t Syncd::processNotifySyncd(
             m_veryFirstRun = false;
 
             m_asicInitViewMode = false;
-
-            if (m_commandLineOptions->m_startType == SAI_START_TYPE_FASTFAST_BOOT ||
-                m_commandLineOptions->m_startType == SAI_START_TYPE_EXPRESS_BOOT)
+#ifdef MELLANOX
+            bool applyViewInFastFastBoot = m_commandLineOptions->m_startType == SAI_START_TYPE_FASTFAST_BOOT ||
+                                           m_commandLineOptions->m_startType == SAI_START_TYPE_EXPRESS_BOOT ||
+                                           m_commandLineOptions->m_startType == SAI_START_TYPE_FAST_BOOT;
+#else
+            bool applyViewInFastFastBoot = m_commandLineOptions->m_startType == SAI_START_TYPE_FASTFAST_BOOT ||
+                                           m_commandLineOptions->m_startType == SAI_START_TYPE_EXPRESS_BOOT;
+#endif
+            if (applyViewInFastFastBoot)
             {
                 // express/fastfast boot configuration end
 
@@ -3829,6 +3856,14 @@ sai_status_t Syncd::processNotifySyncd(
             }
 
             SWSS_LOG_NOTICE("setting very first run to FALSE, op = %s", key.c_str());
+        }
+        else if (redisNotifySyncd == SAI_REDIS_NOTIFY_SYNCD_INSPECT_ASIC)
+        {
+            SWSS_LOG_NOTICE("syncd switched to INSPECT ASIC mode");
+
+            inspectAsic();
+
+            sendNotifyResponse(SAI_STATUS_SUCCESS);
         }
         else
         {
@@ -4318,7 +4353,7 @@ void Syncd::onSyncdStart(
         SWSS_LOG_THROW("performing hard reinit, but there are %zu switches defined, bug!", m_switches.size());
     }
 
-    HardReiniter hr(m_client, m_translator, m_vendorSai, m_handler);
+    HardReiniter hr(m_client, m_translator, m_vendorSai, m_handler, m_commandLineOptions->m_enableAttrVersionCheck);
 
     m_switches = hr.hardReinit();
 
@@ -4420,7 +4455,7 @@ void Syncd::onSwitchCreateInInitViewMode(
 
         // make switch initialization and get all default data
 
-        m_switches[switchVid] = std::make_shared<SaiSwitch>(switchVid, switchRid, m_client, m_translator, m_vendorSai);
+        m_switches[switchVid] = std::make_shared<SaiSwitch>(switchVid, switchRid, m_client, m_translator, m_vendorSai, false, m_commandLineOptions->m_enableAttrVersionCheck);
 
         m_mdioIpcServer->setSwitchId(switchRid);
 
@@ -4604,7 +4639,7 @@ void Syncd::performWarmRestartSingleSwitch(
 
     // perform all get operations on existing switch
 
-    auto sw = m_switches[switchVid] = std::make_shared<SaiSwitch>(switchVid, switchRid, m_client, m_translator, m_vendorSai, true);
+    auto sw = m_switches[switchVid] = std::make_shared<SaiSwitch>(switchVid, switchRid, m_client, m_translator, m_vendorSai, true, m_commandLineOptions->m_enableAttrVersionCheck);
 
     startDiagShell(switchRid);
 }

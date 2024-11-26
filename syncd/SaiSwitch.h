@@ -34,7 +34,8 @@ namespace syncd
                     _In_ std::shared_ptr<RedisClient> client,
                     _In_ std::shared_ptr<VirtualOidTranslator> translator,
                     _In_ std::shared_ptr<sairedis::SaiInterface> vendorSai,
-                    _In_ bool warmBoot = false);
+                    _In_ bool warmBoot,
+                    _In_ bool checkAttrVersion);
 
             virtual ~SaiSwitch() = default;
 
@@ -354,5 +355,7 @@ namespace syncd
             std::shared_ptr<VirtualOidTranslator> m_translator;
 
             std::shared_ptr<RedisClient> m_client;
+
+            bool m_checkAttrVersion;
     };
 }

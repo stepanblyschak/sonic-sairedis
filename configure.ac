@@ -19,6 +19,9 @@ AM_CONDITIONAL(SONIC_ASIC_PLATFORM_BAREFOOT,   test x$CONFIGURED_PLATFORM = xbar
 AM_CONDITIONAL(SONIC_ASIC_PLATFORM_BROADCOM,   test x$CONFIGURED_PLATFORM = xbroadcom)
 AM_CONDITIONAL(SONIC_ASIC_PLATFORM_MELLANOX,   test x$CONFIGURED_PLATFORM = xmellanox)
 
+AM_COND_IF([SONIC_ASIC_PLATFORM_MELLANOX],
+           AC_DEFINE([MELLANOX], [1], [Define to 1 on Mellanox Platform]))
+
 AC_ARG_ENABLE(debug,
 [  --enable-debug          turn on debugging],
 [case "${enableval}" in
@@ -145,7 +148,7 @@ fi
 AM_CONDITIONAL(ASAN_ENABLED, test x$asan_enabled = xtrue)
 AM_CONDITIONAL(PYTHON2, test x$python2 = xtrue)
 
-AC_PATH_PROGS(SWIG, [swig3.0 swig])
+AC_PATH_PROGS(SWIG, [swig4.0 swig3.0 swig])
 
 CXXFLAGS_COMMON=""
 CXXFLAGS_COMMON+=" -ansi"
@@ -298,6 +301,7 @@ AC_OUTPUT(Makefile
           unittest/vslib/Makefile
           unittest/syncd/Makefile
           unittest/proxylib/Makefile
+          unittest/saidump/Makefile
           pyext/Makefile
           pyext/py2/Makefile
           pyext/py3/Makefile)
