@@ -44,6 +44,11 @@ if [ "$SYNC_MODE" == "enable" ]; then
     CMD_ARGS+=" -s"
 fi
 
+SUPPORTING_BULK_COUNTER_GROUPS=$(echo $SYNCD_VARS | jq -r '.supporting_bulk_counter_groups')
+if [ "$SUPPORTING_BULK_COUNTER_GROUPS" != "" ]; then
+    CMD_ARGS+=" -B $SUPPORTING_BULK_COUNTER_GROUPS"
+fi
+
 case "$(cat /proc/cmdline)" in
   *SONIC_BOOT_TYPE=fastfast*)
     if [ -e /var/warmboot/warm-starting ]; then
@@ -225,6 +230,8 @@ config_syncd_mlnx()
         cat $HWSKU_DIR/sai.profile > /tmp/sai-temp.profile
     fi
 
+    echo >> /tmp/sai-temp.profile
+
     if [[ -f $SAI_COMMON_FILE_PATH ]]; then
         cat $SAI_COMMON_FILE_PATH >> /tmp/sai-temp.profile
     fi
@@ -254,6 +261,9 @@ config_syncd_mlnx()
     if [[ -f /tmp/sai_extra.profile ]]; then
         cat /tmp/sai_extra.profile >> /tmp/sai.profile
     fi
+
+    # Ensure no redundant newlines
+    sed -i '/^$/d' /tmp/sai.profile
 }
 
 config_syncd_centec()
@@ -279,6 +289,8 @@ config_syncd_cavium()
 config_syncd_marvell()
 {
     CMD_ARGS+=" -p $HWSKU_DIR/sai.profile"
+
+    export MRVL_PSAI_SONIC=1
 
     [ -e /dev/net/tun ] || ( mkdir -p /dev/net && mknod /dev/net/tun c 10 200 )
 }
@@ -330,17 +342,35 @@ config_syncd_vs()
     CMD_ARGS+=" -l -p $HWSKU_DIR/sai.profile"
 }
 
+vpp_api_check()
+{
+   VPP_API_SOCK=$1
+   while true
+   do
+      [ -S "$VPP_API_SOCK" ] && vpp_api_test socket-name $VPP_API_SOCK <<< "show_version" 2>/dev/null | grep "version:" && break
+      sleep 1
+   done
+}
+
+config_syncd_vpp()
+{
+    CMD_ARGS+=" -p $HWSKU_DIR/sai.profile"
+    vpp_api_check "/run/vpp/api.sock"
+    source /etc/sonic/vpp/syncd_vpp_env
+    export NO_LINUX_NL
+}
+
 config_syncd_soda()
 {
     # Add support for SAI bulk operations
     CMD_ARGS+=" -l -p $HWSKU_DIR/sai.profile"
 }
 
-config_syncd_innovium()
+config_syncd_marvell_teralynx()
 {
     CMD_ARGS+=" -p $HWSKU_DIR/sai.profile"
     ulimit -s 65536
-    export II_ROOT="/var/log/invm"
+    export II_ROOT="/var/log/mrvl_teralynx"
     export II_APPEND_LOG=1
     mkdir -p $II_ROOT
 }
@@ -464,8 +494,10 @@ config_syncd()
         config_syncd_nephos
     elif [ "$SONIC_ASIC_TYPE" == "vs" ]; then
         config_syncd_vs
-    elif [ "$SONIC_ASIC_TYPE" == "innovium" ]; then
-        config_syncd_innovium
+    elif [ "$SONIC_ASIC_TYPE" == "vpp" ]; then
+        config_syncd_vpp
+    elif [ "$SONIC_ASIC_TYPE" == "marvell-teralynx" ]; then
+        config_syncd_marvell_teralynx
     elif [ "$SONIC_ASIC_TYPE" == "soda" ]; then
         config_syncd_soda
     elif [ "$SONIC_ASIC_TYPE" == "nvidia-bluefield" ]; then
