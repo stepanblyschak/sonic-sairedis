@@ -614,16 +614,12 @@ sai_status_t VendorSai::bulkSet(
             ptr = m_apis.port_api->set_ports_attribute;
             break;
 
-        case SAI_OBJECT_TYPE_NEXT_HOP:
-            ptr = m_apis.next_hop_api->set_next_hops_attribute;
+        case SAI_OBJECT_TYPE_INGRESS_PRIORITY_GROUP:
+            ptr = m_apis.buffer_api->set_ingress_priority_groups_attribute;
             break;
 
-        case SAI_OBJECT_TYPE_TUNNEL:
-            ptr = m_apis.tunnel_api->set_tunnels_attribute;
-            break;
-
-        case SAI_OBJECT_TYPE_NEXT_HOP_GROUP_MEMBER:
-            ptr = m_apis.next_hop_group_api->set_next_hop_group_members_attribute;
+        case SAI_OBJECT_TYPE_QUEUE:
+            ptr = m_apis.queue_api->set_queues_attribute;
             break;
 
         default:
