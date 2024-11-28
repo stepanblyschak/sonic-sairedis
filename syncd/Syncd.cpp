@@ -2073,7 +2073,6 @@ sai_status_t Syncd::processBulkOidSet(
     {
         SWSS_LOG_ERROR("bulkSet api is not implemented or not supported, object_type = %s",
                 sai_serialize_object_type(objectType).c_str());
-        return status;
     }
 
     return status;
