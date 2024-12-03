@@ -389,3 +389,74 @@ TEST_F(SyncdBrcmTest, neighborBulkTest)
         ASSERT_EQ(status, SAI_STATUS_SUCCESS);
     }
 }
+
+TEST_F(SyncdBrcmTest, portBulkSet)
+{
+    sai_object_id_t switchId;
+    sai_attribute_t attrs[1];
+
+    struct
+    {
+        std::vector<sai_object_id_t> oids;
+        std::vector<sai_attribute_t> attrs;
+        std::vector<sai_status_t> statuses;
+
+        void resize(size_t size)
+        {
+            oids.resize(size);
+            attrs.resize(size);
+            statuses.resize(size, SAI_STATUS_NOT_EXECUTED);
+        }
+    } ports;
+
+    // init view
+
+    attrs[0].id = SAI_REDIS_SWITCH_ATTR_NOTIFY_SYNCD;
+    attrs[0].value.s32 = SAI_REDIS_NOTIFY_SYNCD_INIT_VIEW;
+
+    auto status = m_sairedis->set(SAI_OBJECT_TYPE_SWITCH, SAI_NULL_OBJECT_ID, attrs);
+    ASSERT_EQ(status, SAI_STATUS_SUCCESS);
+
+    // create switch
+
+    attrs[0].id = SAI_SWITCH_ATTR_INIT_SWITCH;
+    attrs[0].value.booldata = true;
+
+    status = m_sairedis->create(SAI_OBJECT_TYPE_SWITCH, &switchId, SAI_NULL_OBJECT_ID, 1, attrs);
+    ASSERT_EQ(status, SAI_STATUS_SUCCESS);
+
+    attrs[0].id = SAI_SWITCH_ATTR_PORT_NUMBER;
+    status = m_sairedis->get(SAI_OBJECT_TYPE_SWITCH, switchId, 1, attrs);
+    ASSERT_EQ(status, SAI_STATUS_SUCCESS);
+
+    ports.resize(attrs[0].value.u32);
+
+    attrs[0].id = SAI_SWITCH_ATTR_PORT_LIST;
+    attrs[0].value.objlist.count = static_cast<uint32_t>(ports.oids.size());
+    attrs[0].value.objlist.list = ports.oids.data();
+    status = m_sairedis->get(SAI_OBJECT_TYPE_SWITCH, switchId, 1, attrs);
+    ASSERT_EQ(status, SAI_STATUS_SUCCESS);
+
+    for (size_t i = 0; i < ports.oids.size(); i++)
+    {
+        ports.attrs[i].id = SAI_PORT_ATTR_ADMIN_STATE;
+        ports.attrs[i].value.booldata = true;
+    }
+
+    status = m_sairedis->bulkSet(SAI_OBJECT_TYPE_PORT, static_cast<uint32_t>(ports.oids.size()), ports.oids.data(),
+        ports.attrs.data(), SAI_BULK_OP_ERROR_MODE_IGNORE_ERROR, ports.statuses.data());
+    ASSERT_EQ(status, SAI_STATUS_SUCCESS);
+
+    for (size_t i = 0; i < ports.oids.size(); i++)
+    {
+        ASSERT_EQ(ports.statuses[i], SAI_STATUS_SUCCESS);
+    }
+
+    // apply view
+
+    attrs[0].id = SAI_REDIS_SWITCH_ATTR_NOTIFY_SYNCD;
+    attrs[0].value.s32 = SAI_REDIS_NOTIFY_SYNCD_APPLY_VIEW;
+
+    status = m_sairedis->set(SAI_OBJECT_TYPE_SWITCH, SAI_NULL_OBJECT_ID, attrs);
+    ASSERT_EQ(status, SAI_STATUS_SUCCESS);
+}
