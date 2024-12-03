@@ -403,6 +403,8 @@ TEST_F(SyncdBrcmTest, portBulkSet)
 
         void resize(size_t size)
         {
+            SWSS_LOG_ENTER();
+
             oids.resize(size);
             attrs.resize(size);
             statuses.resize(size, SAI_STATUS_NOT_EXECUTED);
