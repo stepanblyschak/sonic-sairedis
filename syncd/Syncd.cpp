@@ -2023,7 +2023,7 @@ sai_status_t Syncd::processBulkOidCreate(
 
             if (objectType == SAI_OBJECT_TYPE_PORT)
             {
-                m_switches.at(switchVid)->onPostPortCreate(objectRids[idx], objectVids[idx], shouldDiscoverPortObjects());
+                m_switches.at(switchVid)->onPostPortCreate(objectRids[idx], objectVids[idx]);
             }
         }
     }
@@ -3152,7 +3152,7 @@ sai_status_t Syncd::processOidCreate(
 
         if (objectType == SAI_OBJECT_TYPE_PORT)
         {
-            m_switches.at(switchVid)->onPostPortCreate(objectRid, objectVid, shouldDiscoverPortObjects());
+            m_switches.at(switchVid)->onPostPortCreate(objectRid, objectVid);
         }
     }
 
@@ -5337,24 +5337,4 @@ syncd_restart_type_t Syncd::handleRestartQuery(
     SWSS_LOG_NOTICE("received %s switch shutdown event", op.c_str());
 
     return RequestShutdownCommandLineOptions::stringToRestartType(op);
-}
-
-bool Syncd::shouldDiscoverPortObjects() const
-{
-    SWSS_LOG_ENTER();
-
-#ifdef SKIP_SAI_PORT_DISCOVERY_ON_FAST_BOOT
-    const bool discoverPortObjectsInFastBoot = false;
-#else
-    const bool discoverPortObjectsInFastBoot = true;
-#endif
-
-    // Comparing with m_veryFirstRun, so that we only skip discovery when switch is fast booting
-    // and not after it finished fast boot (e.g. port breakout after fast-reboot).
-    if ((m_commandLineOptions->m_startType == SAI_START_TYPE_FAST_BOOT) && m_veryFirstRun)
-    {
-        return discoverPortObjectsInFastBoot;
-    }
-
-    return true;
 }

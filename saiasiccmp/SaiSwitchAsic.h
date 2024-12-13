@@ -66,8 +66,7 @@ namespace saiasiccmp
 
             virtual void onPostPortCreate(
                     _In_ sai_object_id_t port_rid,
-                    _In_ sai_object_id_t port_vid,
-                    _In_ bool discoverPortObjects = true) override;
+                    _In_ sai_object_id_t port_vid) override;
 
             virtual void postPortRemove(
                     _In_ sai_object_id_t portRid) override;
