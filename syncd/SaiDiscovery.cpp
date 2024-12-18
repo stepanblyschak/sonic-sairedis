@@ -60,13 +60,6 @@ void SaiDiscovery::discover(
 
     sai_object_type_t ot = m_sai->objectTypeQuery(rid);
 
-#ifdef SKIP_SAI_PORT_DISCOVERY
-    if (ot == SAI_OBJECT_TYPE_PORT)
-    {
-        return;
-    }
-#endif
-
     if (ot == SAI_OBJECT_TYPE_NULL)
     {
         SWSS_LOG_THROW("objectTypeQuery: rid %s returned NULL object type",
@@ -93,6 +86,13 @@ void SaiDiscovery::discover(
     {
         discovered.insert(rid);
     }
+
+#ifdef SKIP_SAI_PORT_DISCOVERY
+    if (ot == SAI_OBJECT_TYPE_PORT)
+    {
+        return;
+    }
+#endif
 
     const sai_object_type_info_t *info = sai_metadata_get_object_type_info(ot);
 
