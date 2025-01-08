@@ -935,31 +935,45 @@ sai_status_t Syncd::processBulkQuadEventInInitViewMode(
             switch (objectType)
             {
                 case SAI_OBJECT_TYPE_SWITCH:
-                case SAI_OBJECT_TYPE_PORT:
                 case SAI_OBJECT_TYPE_SCHEDULER_GROUP:
-                case SAI_OBJECT_TYPE_INGRESS_PRIORITY_GROUP:
 
                     SWSS_LOG_THROW("%s is not supported in init view mode",
                             sai_serialize_object_type(objectType).c_str());
 
-                default:
+                case SAI_OBJECT_TYPE_PORT:
+                case SAI_OBJECT_TYPE_INGRESS_PRIORITY_GROUP:
 
-                    sendApiResponse(api, SAI_STATUS_SUCCESS, (uint32_t)statuses.size(), statuses.data());
-
-                    syncUpdateRedisBulkQuadEvent(api, statuses, objectType, objectIds, strAttributes);
-
-                    for (auto& str: objectIds)
+                    if (api != SAI_COMMON_API_BULK_SET)
                     {
-                        sai_object_id_t objectVid;
-                        sai_deserialize_object_id(str, objectVid);
-
-                        // in init view mode insert every created object except switch
-
-                        m_createdInInitView.insert(objectVid);
+                        SWSS_LOG_THROW("%s is not supported in init view mode",
+                                sai_serialize_object_type(objectType).c_str());
                     }
 
-                    return SAI_STATUS_SUCCESS;
+                    break;
+
+                default:
+
+                    break;
             }
+
+            sendApiResponse(api, SAI_STATUS_SUCCESS, (uint32_t)statuses.size(), statuses.data());
+
+            syncUpdateRedisBulkQuadEvent(api, statuses, objectType, objectIds, strAttributes);
+
+            if (api == SAI_COMMON_API_BULK_CREATE)
+            {
+                for (auto& str: objectIds)
+                {
+                    sai_object_id_t objectVid;
+                    sai_deserialize_object_id(str, objectVid);
+
+                    // in init view mode insert every created object except switch
+
+                    m_createdInInitView.insert(objectVid);
+                }
+            }
+
+            return SAI_STATUS_SUCCESS;
 
         case SAI_COMMON_API_BULK_GET:
             SWSS_LOG_THROW("GET bulk api is not implemented in init view mode, FIXME");
