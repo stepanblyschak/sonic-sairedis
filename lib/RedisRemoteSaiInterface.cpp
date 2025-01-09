@@ -1643,6 +1643,8 @@ sai_status_t RedisRemoteSaiInterface::waitForBulkGetResponse(
         }
     }
 
+    m_recorder->recordBulkGenericGetResponse(status, values);
+
     return status;
 }
 
@@ -1789,6 +1791,8 @@ sai_status_t RedisRemoteSaiInterface::bulkGet(
     const auto key = serializedObjectType + ":" + std::to_string(entries.size());
 
     m_communicationChannel->set(key, entries, REDIS_ASIC_STATE_COMMAND_BULK_GET);
+
+    m_recorder->recordBulkGenericGet(serializedObjectType, entries);
 
     const auto object_count = static_cast<uint32_t>(serialized_object_ids.size());
 
