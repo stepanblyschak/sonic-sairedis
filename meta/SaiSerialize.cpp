@@ -90,24 +90,27 @@ static sai_status_t transfer_list(
 {
     SWSS_LOG_ENTER();
 
-    if (countOnly || dst_element.count == 0)
+    if (countOnly)
     {
         transfer_primitive(src_element.count, dst_element.count);
         return SAI_STATUS_SUCCESS;
     }
 
-    if (dst_element.list == NULL)
-    {
-        SWSS_LOG_ERROR("destination list is null, unable to transfer elements");
-
-        return SAI_STATUS_FAILURE;
-    }
-
     if (dst_element.count >= src_element.count)
     {
-        if (src_element.list == NULL && src_element.count > 0)
+        if (src_element.count > 0)
         {
-            SWSS_LOG_THROW("source list is NULL when count is %u, wrong db insert?", src_element.count);
+            if (dst_element.list == NULL)
+            {
+                SWSS_LOG_ERROR("destination list is null, unable to transfer elements");
+
+                return SAI_STATUS_FAILURE;
+            }
+
+            if (src_element.list == NULL)
+            {
+                SWSS_LOG_THROW("source list is NULL when count is %u, wrong db insert?", src_element.count);
+            }
         }
 
         transfer_primitive(src_element.count, dst_element.count);
