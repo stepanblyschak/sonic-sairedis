@@ -158,6 +158,9 @@ namespace syncd
                     _In_ sai_object_id_t bvId,
                     _In_ sai_fdb_flush_entry_type_t type);
 
+            void setBuffered(_In_ bool buffered);
+            void flush();
+
         private:
 
             std::map<sai_object_id_t, swss::TableDump> getAsicView(
@@ -178,8 +181,37 @@ namespace syncd
         private:
 
             std::shared_ptr<swss::DBConnector> m_dbAsic;
+            std::shared_ptr<swss::RedisPipeline> m_pipeline;
+            bool m_buffered = false;
 
             std::string m_fdbFlushSha;
 
+    };
+
+    class RedisBufferedScope
+    {
+    public:
+        explicit RedisBufferedScope(RedisClient* client) : m_client(client)
+        {
+            SWSS_LOG_ENTER();
+
+			m_client->setBuffered(true);
+        }
+
+        ~RedisBufferedScope()
+        {
+            SWSS_LOG_ENTER();
+
+            m_client->flush();
+            m_client->setBuffered(false);
+        }
+
+        RedisBufferedScope(const RedisBufferedScope&) = delete;
+        RedisBufferedScope& operator=(const RedisBufferedScope&) = delete;
+        RedisBufferedScope(RedisBufferedScope&&) = delete;
+        RedisBufferedScope& operator=(RedisBufferedScope&&) = delete;
+
+    private:
+        RedisClient* m_client;
     };
 }

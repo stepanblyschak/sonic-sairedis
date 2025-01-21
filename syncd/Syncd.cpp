@@ -2161,6 +2161,8 @@ sai_status_t Syncd::processBulkOid(
 {
     SWSS_LOG_ENTER();
 
+    RedisBufferedScope bufferedScope{m_client.get()};
+
     auto info = sai_metadata_get_object_type_info(objectType);
 
     if (info->isnonobjectid)
