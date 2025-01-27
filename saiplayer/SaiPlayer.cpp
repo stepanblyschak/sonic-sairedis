@@ -2380,7 +2380,7 @@ sai_status_t SaiPlayer::handle_bulk_object(
                                             attr_counts.data(),
                                             attr_lists.data(),
                                             mode,
-                                            statuses.data()); // STATUS_NOT_EXECUTED
+                                            statuses.data());
 
             return status;
         }
