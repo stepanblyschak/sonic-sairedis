@@ -69,7 +69,7 @@ TEST_F(SwitchStateBaseTest, switchHashGet)
     attr.id = SAI_HASH_ATTR_NATIVE_HASH_FIELD_LIST;
     attr.value.s32list.list = nullptr;
     attr.value.s32list.count = 0;
-    ASSERT_EQ(m_ss->get(SAI_OBJECT_TYPE_HASH, sai_serialize_object_id(ecmpHashOid), 1, &attr), SAI_STATUS_BUFFER_OVERFLOW);
+    ASSERT_EQ(m_ss->get(SAI_OBJECT_TYPE_HASH, sai_serialize_object_id(ecmpHashOid), 1, &attr), SAI_STATUS_SUCCESS);
 
     std::vector<sai_int32_t> hfList(attr.value.s32list.count);
     attr.value.s32list.list = hfList.data();

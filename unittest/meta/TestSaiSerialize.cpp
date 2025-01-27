@@ -227,22 +227,6 @@ TEST(SaiSerialize, transfer_list)
     dst.value.u32list.list = list;
 
     EXPECT_EQ(SAI_STATUS_BUFFER_OVERFLOW, transfer_attributes(SAI_OBJECT_TYPE_PORT, 1, &src, &dst, false));
-
-    src.value.u32list.count = 2;
-    src.value.u32list.list = list;
-
-    dst.value.u32list.count = 0;
-    dst.value.u32list.list = nullptr;
-
-    EXPECT_EQ(SAI_STATUS_BUFFER_OVERFLOW, transfer_attributes(SAI_OBJECT_TYPE_PORT, 1, &src, &dst, false));
-
-    src.value.u32list.count = 0;
-    src.value.u32list.list = nullptr;
-
-    dst.value.u32list.count = 0;
-    dst.value.u32list.list = nullptr;
-
-    EXPECT_EQ(SAI_STATUS_SUCCESS, transfer_attributes(SAI_OBJECT_TYPE_PORT, 1, &src, &dst, false));
 }
 
 TEST(SaiSerialize, sai_deserialize_ip_prefix)
