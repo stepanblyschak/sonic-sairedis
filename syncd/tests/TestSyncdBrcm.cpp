@@ -975,6 +975,11 @@ TEST_F(SyncdBrcmTest, portBulkGetObjectListInsufficientBuffer)
     std::vector<std::vector<sai_object_id_t>> queues;
     queues.resize(portGetBulk.oids.size());
 
+    for (size_t i = 0; i < queues.size(); i++)
+    {
+        queues[i].resize(1); // Insufficient size
+    }
+
     // Get port attributes in bulk
 
     portGetBulk.resize(portNumber, 1);
