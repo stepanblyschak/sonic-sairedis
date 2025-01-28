@@ -19,9 +19,12 @@ using namespace syncd;
 #define HIDDEN                      "HIDDEN"
 #define COLDVIDS                    "COLDVIDS"
 
+#define MAX_REDIS_PIPELINE_COMMANDS 1024
+
 RedisClient::RedisClient(
         _In_ std::shared_ptr<swss::DBConnector> dbAsic):
-    m_dbAsic(dbAsic)
+    m_dbAsic(dbAsic),
+    m_pipeline(std::make_shared<swss::RedisPipeline>(m_dbAsic.get(), MAX_REDIS_PIPELINE_COMMANDS))
 {
     SWSS_LOG_ENTER();
 
@@ -388,7 +391,14 @@ void RedisClient::setPortLanes(
         std::string strLane = sai_serialize_number(lane);
         std::string strPortRid = sai_serialize_object_id(portRid);
 
-        m_dbAsic->hset(key, strLane, strPortRid);
+        swss::RedisCommand hset;
+        hset.formatHSET(key, strLane, strPortRid);
+        m_pipeline->push(hset, REDIS_REPLY_INTEGER);
+    }
+
+    if (!m_buffered)
+    {
+        flush();
     }
 }
 
@@ -531,7 +541,14 @@ void RedisClient::setAsicObject(
 
     std::string key = (ASIC_STATE_TABLE ":") + sai_serialize_object_meta_key(metaKey);
 
-    m_dbAsic->hset(key, attr, value);
+    swss::RedisCommand hset;
+    hset.formatHSET(key, attr, value);
+    m_pipeline->push(hset, REDIS_REPLY_INTEGER);
+
+    if (!m_buffered)
+    {
+        flush();
+    }
 }
 
 void RedisClient::setTempAsicObject(
@@ -543,7 +560,14 @@ void RedisClient::setTempAsicObject(
 
     std::string key = (TEMP_PREFIX ASIC_STATE_TABLE ":") + sai_serialize_object_meta_key(metaKey);
 
-    m_dbAsic->hset(key, attr, value);
+    swss::RedisCommand hset;
+    hset.formatHSET(key, attr, value);
+    m_pipeline->push(hset, REDIS_REPLY_INTEGER);
+
+    if (!m_buffered)
+    {
+        flush();
+    }
 }
 
 void RedisClient::createAsicObject(
@@ -713,8 +737,18 @@ void RedisClient::insertVidAndRid(
     auto strVid = sai_serialize_object_id(vid);
     auto strRid = sai_serialize_object_id(rid);
 
-    m_dbAsic->hset(VIDTORID, strVid, strRid);
-    m_dbAsic->hset(RIDTOVID, strRid, strVid);
+    swss::RedisCommand hset;
+
+    hset.formatHSET(VIDTORID, strVid, strRid);
+    m_pipeline->push(hset, REDIS_REPLY_INTEGER);
+
+    hset.formatHSET(RIDTOVID, strRid, strVid);
+    m_pipeline->push(hset, REDIS_REPLY_INTEGER);
+
+    if (!m_buffered)
+    {
+        flush();
+    }
 }
 
 sai_object_id_t RedisClient::getVidForRid(
@@ -906,4 +940,14 @@ void RedisClient::processFlushEvent(
 
         swss::RedisReply r(m_dbAsic.get(), command);
     }
+}
+
+void RedisClient::setBuffered(_In_ bool buffered)
+{
+    m_buffered = buffered;
+}
+
+void RedisClient::flush()
+{
+    m_pipeline->flush();
 }
