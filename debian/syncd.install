@@ -5,4 +5,5 @@ usr/bin/saidiscovery
 usr/bin/saiasiccmp
 usr/bin/syncd*
 syncd/scripts/* usr/bin
+syncd/scripts/persistent_mloop.conf etc/supervisor/conf.d
 usr/lib/*/libMdioIpcClient.so.*
