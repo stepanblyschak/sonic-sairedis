@@ -337,6 +337,19 @@ void SaiSwitch::redisSetDummyAsicStateForRealObjectId(
     m_client->setDummyAsicStateObject(vid);
 }
 
+void SaiSwitch::redisSetDummyAsicStateForRealObjectIds(
+        _In_ sai_object_id_t* rids,
+        _In_ size_t count) const
+{
+    SWSS_LOG_ENTER();
+
+    std::vector<sai_object_id_t> vids(count);
+
+    m_translator->translateNewRidToVid(m_switch_vid, rids, vids.data(), count);
+
+    m_client->setDummyAsicStateObject(vids.data(), count);
+}
+
 std::string SaiSwitch::getHardwareInfo() const
 {
     SWSS_LOG_ENTER();
@@ -991,6 +1004,44 @@ void SaiSwitch::onPostPortCreate(
     }
 
     redisUpdatePortLaneMap(port_rid);
+}
+
+void SaiSwitch::onPostPortCreate(
+        _In_ sai_object_id_t* port_rids,
+        _Out_ size_t count)
+{
+    SWSS_LOG_ENTER();
+
+    SaiDiscovery sd(m_vendorSai);
+
+    auto discovered = sd.discover(port_rids, count);
+
+    auto defaultOidMap = sd.getDefaultOidMap();
+
+    // we need to merge default oid maps
+
+    for (auto& kvp: defaultOidMap)
+    {
+        for (auto& it: kvp.second)
+        {
+            m_defaultOidMap[kvp.first][it.first] = it.second;
+        }
+    }
+
+    SWSS_LOG_NOTICE("discovered %zu new objects (including port) after creating %zu ports",
+            discovered.size(), count);
+
+    m_discovered_rids.insert(discovered.begin(), discovered.end());
+
+    std::vector<sai_object_id_t> rids{discovered.begin(), discovered.end()};
+
+    redisSetDummyAsicStateForRealObjectIds(rids.data(), rids.size());
+
+    // TODO(Stepan): make it in bulk
+    for (size_t idx = 0; idx < count; idx++)
+    {
+        redisUpdatePortLaneMap(port_rids[idx]);
+    }
 }
 
 bool SaiSwitch::isWarmBoot() const

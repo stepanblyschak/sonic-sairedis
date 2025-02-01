@@ -120,7 +120,7 @@ void SaiDiscovery::discover(
                  * create, we don't need to query this attribute.
                  */
 
-                //continue;
+                continue;
             }
 
             if (md->objecttype == SAI_OBJECT_TYPE_STP &&
@@ -197,7 +197,7 @@ void SaiDiscovery::discover(
                  * create, we don't need to query this attribute.
                  */
 
-                //continue;
+                continue;
             }
 
             SWSS_LOG_DEBUG("getting %s for %s", md->attridname,
@@ -252,6 +252,15 @@ std::set<sai_object_id_t> SaiDiscovery::discover(
 {
     SWSS_LOG_ENTER();
 
+    return discover(&startRid, 1);
+}
+
+std::set<sai_object_id_t> SaiDiscovery::discover(
+        _In_ sai_object_id_t* rids,
+        _In_ size_t count)
+{
+    SWSS_LOG_ENTER();
+
     /*
      * Preform discovery on the switch to obtain ASIC view of
      * objects that are created internally.
@@ -268,7 +277,10 @@ std::set<sai_object_id_t> SaiDiscovery::discover(
 
         setApiLogLevel(SAI_LOG_LEVEL_CRITICAL);
 
-        discover(startRid, discovered_rids);
+        for (size_t idx = 0; idx < count; idx++)
+        {
+            discover(rids[idx], discovered_rids);
+        }
 
         setApiLogLevel(levels);
     }

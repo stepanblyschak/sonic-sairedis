@@ -147,6 +147,37 @@ sai_object_id_t VirtualOidTranslator::translateRidToVid(
     return vid;
 }
 
+void VirtualOidTranslator::translateNewRidToVid(
+        _In_ sai_object_id_t switchVid,
+        _In_ sai_object_id_t* rids,
+        _Out_ sai_object_id_t* vids,
+        _In_ size_t count)
+{
+    SWSS_LOG_ENTER();
+
+    std::lock_guard<std::mutex> lock(m_mutex);
+
+    std::vector<sai_object_type_t> objectTypes(count);
+
+    for (size_t idx = 0; idx < count; idx++)
+    {
+        objectTypes[idx] = m_vendorSai->objectTypeQuery(rids[idx]);
+    }
+
+    m_virtualObjectIdManager->allocateNewObjectIds(switchVid, objectTypes.data(), vids, count);
+
+    // TODO(Stepan): log anything?
+
+    for (size_t idx = 0; idx < count; idx++)
+    {
+        m_rid2vid[rids[idx]] = vids[idx];
+        m_vid2rid[vids[idx]] = rids[idx];
+
+    }
+
+    m_client->insertVidAndRid(vids, rids, count);
+}
+
 bool VirtualOidTranslator::checkRidExists(
         _In_ sai_object_id_t rid,
         _In_ bool checkRemoved)
@@ -541,6 +572,26 @@ void VirtualOidTranslator::insertRidAndVid(
     m_vid2rid[vid] = rid;
 
     m_client->insertVidAndRid(vid, rid);
+}
+
+void VirtualOidTranslator::insertRidAndVid(
+        _In_ sai_object_id_t* rids,
+        _In_ sai_object_id_t* vids,
+        _In_ size_t count)
+{
+    SWSS_LOG_ENTER();
+
+    std::lock_guard<std::mutex> lock(m_mutex);
+
+    // to support multiple switches vid/rid map must be per switch
+
+    for (size_t idx = 0; idx < count; idx++)
+    {
+        m_rid2vid[rids[idx]] = vids[idx];
+        m_vid2rid[vids[idx]] = rids[idx];
+    }
+
+    m_client->insertVidAndRid(vids, rids, count);
 }
 
 void VirtualOidTranslator::eraseRidAndVid(

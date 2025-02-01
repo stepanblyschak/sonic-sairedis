@@ -2064,6 +2064,10 @@ sai_status_t Syncd::processBulkOidCreate(
         return status;
     }
 
+    std::vector<sai_object_id_t> createdRids, createdVids;
+    createdRids.reserve(object_count);
+    createdVids.reserve(object_count);
+
     /*
      * Object was created so new object id was generated we need to save
      * virtual id's to redis db.
@@ -2072,17 +2076,16 @@ sai_status_t Syncd::processBulkOidCreate(
     {
         if (statuses[idx] == SAI_STATUS_SUCCESS)
         {
-            m_translator->insertRidAndVid(objectRids[idx], objectVids[idx]);
-
-            SWSS_LOG_INFO("saved VID %s to RID %s",
-                    sai_serialize_object_id(objectVids[idx]).c_str(),
-                    sai_serialize_object_id(objectRids[idx]).c_str());
-
-            if (objectType == SAI_OBJECT_TYPE_PORT)
-            {
-                m_switches.at(switchVid)->onPostPortCreate(objectRids[idx], objectVids[idx]);
-            }
+            createdRids.push_back(objectRids[idx]);
+            createdVids.push_back(objectVids[idx]);
         }
+    }
+
+    m_translator->insertRidAndVid(createdRids.data(), createdVids.data(), createdRids.size());
+
+    if (objectType == SAI_OBJECT_TYPE_PORT)
+    {
+        m_switches.at(switchVid)->onPostPortCreate(createdRids.data(), createdRids.size());
     }
 
     return status;
@@ -3927,6 +3930,17 @@ void Syncd::snoopGetOid(
     {
         // if snooped oid is NULL then we don't need take any action
         return;
+    }
+
+    sai_object_id_t rid = SAI_NULL_OBJECT_ID;
+    if (m_translator->tryTranslateVidToRid(vid, rid))
+    {
+        const auto switchVid = VidManager::switchIdQuery(vid);
+        if (m_switches[switchVid]->isDiscoveredRid(rid))
+        {
+            // Already discovered object.
+            return;
+        }
     }
 
     /*

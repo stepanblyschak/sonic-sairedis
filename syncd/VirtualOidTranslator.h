@@ -58,6 +58,14 @@ namespace syncd
                     _In_ sai_object_id_t switchVid,
                     _In_ bool translateRemoved = false);
 
+            /* This method creates rid to vid mapping and should be used only for newly discovered objects.
+             */
+            void translateNewRidToVid(
+                    _In_ sai_object_id_t switchVid,
+                    _In_ sai_object_id_t* rid,
+                    _Out_ sai_object_id_t* vid,
+                    _In_ size_t count);
+
             /*
              * This method is required to translate RID to VIDs when we are doing
              * snoop for new ID's in init view mode, on in apply view mode when we
@@ -110,6 +118,11 @@ namespace syncd
             void insertRidAndVid(
                     _In_ sai_object_id_t rid,
                     _In_ sai_object_id_t vid);
+
+            void insertRidAndVid(
+                    _In_ sai_object_id_t* rids,
+                    _In_ sai_object_id_t* vids,
+                    _In_ size_t count);
 
             void clearLocalCache();
 

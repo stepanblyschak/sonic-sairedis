@@ -190,6 +190,10 @@ namespace syncd
                     _In_ sai_object_id_t port_rid,
                     _In_ sai_object_id_t port_vid) override;
 
+            virtual void onPostPortCreate(
+                    _In_ sai_object_id_t* port_rid,
+                    _Out_ size_t count) override;
+
             /**
              * @brief Post port remove.
              *
@@ -242,6 +246,10 @@ namespace syncd
 
             void redisSetDummyAsicStateForRealObjectId(
                     _In_ sai_object_id_t rid) const;
+
+            void redisSetDummyAsicStateForRealObjectIds(
+                    _In_ sai_object_id_t* rids,
+                    _In_ size_t count) const;
 
             /**
              * @brief Put cold boot discovered VIDs to redis DB.
