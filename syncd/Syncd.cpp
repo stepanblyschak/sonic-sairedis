@@ -2184,7 +2184,7 @@ sai_status_t Syncd::processBulkOidGet(
 
     if (status == SAI_STATUS_NOT_IMPLEMENTED || status == SAI_STATUS_NOT_SUPPORTED)
     {
-        SWSS_LOG_ERROR("bulkGet api is not implemented or not supported, object_type = %s",
+        SWSS_LOG_WARN("bulkGet api is not implemented or not supported, object_type = %s",
                 sai_serialize_object_type(objectType).c_str());
         return status;
     }
