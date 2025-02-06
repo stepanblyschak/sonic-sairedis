@@ -231,6 +231,32 @@ void RedisClient::setDummyAsicStateObject(
     m_dbAsic->hset(strKey, "NULL", "NULL");
 }
 
+void RedisClient::setDummyAsicStateObject(
+        _In_ sai_object_id_t* objectVid,
+        _In_ size_t count)
+{
+    SWSS_LOG_ENTER();
+
+    swss::RedisPipeline pipe(m_dbAsic.get(), count);
+
+    for (size_t idx = 0; idx < count; idx++)
+    {
+        sai_object_type_t objectType = VidManager::objectTypeQuery(objectVid[idx]);
+
+        std::string strObjectType = sai_serialize_object_type(objectType);
+
+        std::string strVid = sai_serialize_object_id(objectVid[idx]);
+
+        std::string strKey = ASIC_STATE_TABLE + (":" + strObjectType + ":" + strVid);
+
+        swss::RedisCommand hset;
+        hset.format("HSET %s %s %s", strKey.c_str(), "NULL", "NULL");
+        pipe.push(hset, REDIS_REPLY_INTEGER);
+    }
+
+    pipe.flush();
+}
+
 std::string RedisClient::getRedisColdVidsKey(
         _In_ sai_object_id_t switchVid) const
 {
@@ -715,6 +741,36 @@ void RedisClient::insertVidAndRid(
 
     m_dbAsic->hset(VIDTORID, strVid, strRid);
     m_dbAsic->hset(RIDTOVID, strRid, strVid);
+}
+
+void RedisClient::insertVidAndRid(
+        _In_ sai_object_id_t* vids,
+        _In_ sai_object_id_t* rids,
+        _In_ size_t count)
+{
+    SWSS_LOG_ENTER();
+
+    swss::RedisPipeline pipe(m_dbAsic.get(), count * 2);
+
+    for (size_t idx = 0; idx < count; idx++)
+    {
+        auto strVid = sai_serialize_object_id(vids[idx]);
+        auto strRid = sai_serialize_object_id(rids[idx]);
+
+        {
+            swss::RedisCommand hset;
+            hset.format("HSET %s %s %s", VIDTORID, strVid.c_str(), strRid.c_str());
+            pipe.push(hset, REDIS_REPLY_INTEGER);
+        }
+
+        {
+            swss::RedisCommand hset;
+            hset.format("HSET %s %s %s", RIDTOVID, strRid.c_str(), strVid.c_str());
+            pipe.push(hset, REDIS_REPLY_INTEGER);
+        }
+    }
+
+    pipe.flush();
 }
 
 sai_object_id_t RedisClient::getVidForRid(
