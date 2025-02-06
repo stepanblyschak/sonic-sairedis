@@ -14,7 +14,7 @@ namespace sairedis
 
         public:
 
-            virtual uint64_t increment() = 0;
+            virtual uint64_t increment(uint64_t count = 1) = 0;
 
             virtual void reset() = 0;
     };
