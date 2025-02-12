@@ -30,6 +30,12 @@ using namespace std::placeholders;
         SWSS_LOG_ERROR("entry pointer " # pointer " is null");              \
         return SAI_STATUS_INVALID_PARAMETER; }
 
+#define PROCESS_OBJECT_TYPE_ENTER(objectType) \
+    swss::Logger::ScopeLogger objectLogger ## __LINE__ (__LINE__, sai_metadata_all_object_type_infos[objectType]->objecttypename);
+
+#define PROCESS_OBJECT_ATTR_ENTER(objectType, attrId) \
+    swss::Logger::ScopeLogger attrLogger ## __LINE__ (__LINE__, sai_metadata_all_object_type_infos[objectType]->attrmetadata[attrId]->attridname);
+
 Sai::Sai()
 {
     SWSS_LOG_ENTER();
@@ -130,6 +136,8 @@ sai_status_t Sai::create(
     SWSS_LOG_ENTER();
     REDIS_CHECK_API_INITIALIZED();
 
+    PROCESS_OBJECT_TYPE_ENTER(objectType);
+
     REDIS_CHECK_CONTEXT(switchId);
 
     if (objectType == SAI_OBJECT_TYPE_SWITCH && attr_count > 0 && attr_list)
@@ -188,6 +196,8 @@ sai_status_t Sai::remove(
     SWSS_LOG_ENTER();
     REDIS_CHECK_API_INITIALIZED();
     REDIS_CHECK_CONTEXT(objectId);
+
+    PROCESS_OBJECT_TYPE_ENTER(objectType);
 
     return context->m_meta->remove(objectType, objectId);
 }
@@ -249,6 +259,8 @@ sai_status_t Sai::set(
         return success ? SAI_STATUS_SUCCESS : SAI_STATUS_FAILURE;
     }
 
+    PROCESS_OBJECT_ATTR_ENTER(objectType, attr->id);
+
     REDIS_CHECK_CONTEXT(objectId);
 
     return context->m_meta->set(objectType, objectId, attr);
@@ -264,6 +276,8 @@ sai_status_t Sai::get(
     SWSS_LOG_ENTER();
     REDIS_CHECK_API_INITIALIZED();
     REDIS_CHECK_CONTEXT(objectId);
+
+    PROCESS_OBJECT_ATTR_ENTER(objectType, attr_list->id);
 
     return context->m_meta->get(
             objectType,
@@ -461,6 +475,8 @@ sai_status_t Sai::bulkCreate(
     REDIS_CHECK_API_INITIALIZED();
     REDIS_CHECK_CONTEXT(switch_id);
 
+    PROCESS_OBJECT_TYPE_ENTER(object_type);
+
     return context->m_meta->bulkCreate(
             object_type,
             switch_id,
@@ -485,6 +501,8 @@ sai_status_t Sai::bulkRemove(
     REDIS_CHECK_POINTER(object_id);
     REDIS_CHECK_CONTEXT(*object_id);
 
+    PROCESS_OBJECT_TYPE_ENTER(object_type);
+
     return context->m_meta->bulkRemove(
             object_type,
             object_count,
@@ -505,6 +523,8 @@ sai_status_t Sai::bulkSet(
     SWSS_LOG_ENTER();
     REDIS_CHECK_API_INITIALIZED();
     REDIS_CHECK_CONTEXT(*object_id);
+
+    PROCESS_OBJECT_ATTR_ENTER(object_type, attr_list->id);
 
     return context->m_meta->bulkSet(
             object_type,

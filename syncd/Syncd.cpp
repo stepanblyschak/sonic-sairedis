@@ -901,6 +901,15 @@ sai_status_t Syncd::processGetStatsEvent(
     return status;
 }
 
+#define PROCESS_API_ENTER(api) \
+    swss::Logger::ScopeLogger apiLogger ## __LINE__ (__LINE__, sai_metadata_get_common_api_name(api));
+
+#define PROCESS_OBJECT_TYPE_ENTER(objectType) \
+    swss::Logger::ScopeLogger objectLogger ## __LINE__ (__LINE__, sai_metadata_all_object_type_infos[objectType]->objecttypename);
+
+#define PROCESS_OBJECT_ATTR_ENTER(objectType, attrId) \
+    swss::Logger::ScopeLogger attrLogger ## __LINE__ (__LINE__, sai_metadata_all_object_type_infos[objectType]->attrmetadata[attrId]->attridname);
+
 sai_status_t Syncd::processBulkQuadEvent(
         _In_ sai_common_api_t api,
         _In_ const swss::KeyOpFieldsValuesTuple &kco)
@@ -913,6 +922,9 @@ sai_status_t Syncd::processBulkQuadEvent(
 
     sai_object_type_t objectType;
     sai_deserialize_object_type(strObjectType, objectType);
+
+    PROCESS_API_ENTER(api);
+    PROCESS_OBJECT_TYPE_ENTER(objectType);
 
     const std::vector<swss::FieldValueTuple> &values = kfvFieldsValues(kco);
 
@@ -958,6 +970,17 @@ sai_status_t Syncd::processBulkQuadEvent(
 
         attributes.push_back(list);
     }
+
+    sai_attr_id_t attr_id = SAI_SWITCH_ATTR_START;
+    if (!attributes.empty())
+    {
+        if (attributes[0]->get_attr_count() != 0)
+        {
+            auto attr_id = attributes[0]->get_attr_list()->id;
+        }
+    }
+
+    PROCESS_OBJECT_ATTR_ENTER(objectType, attr_id); // Record first attribute ID
 
     SWSS_LOG_INFO("bulk %s executing with %zu items",
             strObjectType.c_str(),
@@ -3060,6 +3083,9 @@ sai_status_t Syncd::processQuadEvent(
         SWSS_LOG_THROW("invalid object type %s", key.c_str());
     }
 
+    PROCESS_API_ENTER(api);
+    PROCESS_OBJECT_TYPE_ENTER(metaKey.objecttype);
+
     auto& values = kfvFieldsValues(kco);
 
     for (auto& v: values)
@@ -3076,6 +3102,14 @@ sai_status_t Syncd::processQuadEvent(
 
     sai_attribute_t *attr_list = list.get_attr_list();
     uint32_t attr_count = list.get_attr_count();
+
+    sai_attr_id_t attr_id = SAI_SWITCH_ATTR_START;
+    if (attr_count)
+    {
+        auto attr_id = attr_list->id;
+    }
+
+    PROCESS_OBJECT_ATTR_ENTER(metaKey.objecttype, attr_id); // Record first attribute ID
 
     /*
      * NOTE: This check pointers must be executed before init view mode, since
