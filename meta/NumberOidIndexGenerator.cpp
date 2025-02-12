@@ -11,11 +11,11 @@ NumberOidIndexGenerator::NumberOidIndexGenerator()
     reset();
 }
 
-uint64_t NumberOidIndexGenerator::increment()
+uint64_t NumberOidIndexGenerator::increment(uint64_t count)
 {
     SWSS_LOG_ENTER();
 
-    return ++m_index;
+    return (m_index += count);
 }
 
 void NumberOidIndexGenerator::reset()

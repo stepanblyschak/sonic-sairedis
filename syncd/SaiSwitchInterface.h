@@ -91,6 +91,10 @@ namespace syncd
                     _In_ sai_object_id_t port_rid,
                     _In_ sai_object_id_t port_vid) = 0;
 
+            virtual void onPostPortCreate(
+                    _In_ sai_object_id_t* port_rid,
+                    _Out_ size_t count) { /* TODO(Stepan): Implement for all downstream classes */ }
+
             virtual void postPortRemove(
                     _In_ sai_object_id_t portRid) = 0;
 
