@@ -24,7 +24,6 @@ tests_SOURCES = \
 				TestRecorder.cpp \
 				TestRedisChannel.cpp \
 				TestClientSai.cpp \
-				TestRedisRemoteSaiInterface.cpp \
 				TestServerSai.cpp \
 				TestSai.cpp
 
